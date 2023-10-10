@@ -1,8 +1,14 @@
 html, body {
+  background: url(../assets/dashglow7.png) no-repeat center center;
+  background-size: cover;
   font-size: 18px;
 }
 
 #root {
+  background-color: #000c;
+  // blur filter on background
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -43,4 +49,14 @@ html, body {
 
 .read-the-docs {
   color: #888;
+}
+
+input {
+  backdrop-filter: blur(10px);
+  // background-color: #000a;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 1em;
+  font-weight: 500;
+  padding: 0.6em 1.2em;
 }

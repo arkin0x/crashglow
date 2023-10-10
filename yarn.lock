@@ -454,6 +454,14 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@nostr-connect/nostr-reqres@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@nostr-connect/nostr-reqres/-/nostr-reqres-0.1.2.tgz#9786012b90afdba626b7782dd40694e32773ffec"
+  integrity sha512-nOe6MPhGwr/YYESPOOe8Gnss+IxJenjdfospoMmGkYQ+Fr2e5B0sI/PJFMo+l67FXBtyk3M9/8u14jyarsPoBw==
+  dependencies:
+    nostr-tools "^1.7.5"
+    websocket-polyfill "^0.0.3"
+
 "@nostr-dev-kit/ndk@^1.3.1":
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/@nostr-dev-kit/ndk/-/ndk-1.3.1.tgz#65869098ba2145ebcbdac8c2a0a1c92808d74715"
@@ -1488,7 +1496,7 @@ normalize-path@^3.0.0, normalize-path@~3.0.0:
   resolved "https://registry.yarnpkg.com/normalize-path/-/normalize-path-3.0.0.tgz#0dcd69ff23a1c9b11fd0978316644a0388216a65"
   integrity sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==
 
-nostr-tools@^1.15.0:
+nostr-tools@^1.15.0, nostr-tools@^1.7.5:
   version "1.16.0"
   resolved "https://registry.yarnpkg.com/nostr-tools/-/nostr-tools-1.16.0.tgz#5867f1d8bd055a5a3b27aadb199457dceb244314"
   integrity sha512-sx/aOl0gmkeHVoIVbyOhEQhzF88NsrBXMC8bsjhPASqA6oZ8uSOAyEGgRLMfC3SKgzQD5Gr6KvDoAahaD6xKcg==
