@@ -1298,3 +1298,123 @@ var La=[Uv,Qs,ab,bb,Tf,Wf,$h,Uf,Xf,ai,Xh,bi,ci,di,ei,_f,Sf,Zf,fi,gi,hi,ii,ji,ki,
 // EMSCRIPTEN_END_ASM
 (asmGlobalArg,asmLibraryArg,buffer);var ___divdi3=Module["___divdi3"]=asm["___divdi3"];var ___emscripten_environ_constructor=Module["___emscripten_environ_constructor"]=asm["___emscripten_environ_constructor"];var ___errno_location=Module["___errno_location"]=asm["___errno_location"];var ___muldi3=Module["___muldi3"]=asm["___muldi3"];var ___udivdi3=Module["___udivdi3"]=asm["___udivdi3"];var __get_daylight=Module["__get_daylight"]=asm["__get_daylight"];var __get_environ=Module["__get_environ"]=asm["__get_environ"];var __get_timezone=Module["__get_timezone"]=asm["__get_timezone"];var __get_tzname=Module["__get_tzname"]=asm["__get_tzname"];var _bitshift64Ashr=Module["_bitshift64Ashr"]=asm["_bitshift64Ashr"];var _bitshift64Lshr=Module["_bitshift64Lshr"]=asm["_bitshift64Lshr"];var _bitshift64Shl=Module["_bitshift64Shl"]=asm["_bitshift64Shl"];var _codo_mixer_callback=Module["_codo_mixer_callback"]=asm["_codo_mixer_callback"];var _free=Module["_free"]=asm["_free"];var _i64Add=Module["_i64Add"]=asm["_i64Add"];var _i64Subtract=Module["_i64Subtract"]=asm["_i64Subtract"];var _main=Module["_main"]=asm["_main"];var _malloc=Module["_malloc"]=asm["_malloc"];var _memcpy=Module["_memcpy"]=asm["_memcpy"];var _memset=Module["_memset"]=asm["_memset"];var _mix_0=Module["_mix_0"]=asm["_mix_0"];var _realloc=Module["_realloc"]=asm["_realloc"];var _saveSetjmp=Module["_saveSetjmp"]=asm["_saveSetjmp"];var _sbrk=Module["_sbrk"]=asm["_sbrk"];var _setThrew=Module["_setThrew"]=asm["_setThrew"];var _testSetjmp=Module["_testSetjmp"]=asm["_testSetjmp"];var establishStackSpace=Module["establishStackSpace"]=asm["establishStackSpace"];var stackAlloc=Module["stackAlloc"]=asm["stackAlloc"];var stackRestore=Module["stackRestore"]=asm["stackRestore"];var stackSave=Module["stackSave"]=asm["stackSave"];var dynCall_ii=Module["dynCall_ii"]=asm["dynCall_ii"];var dynCall_iidiiii=Module["dynCall_iidiiii"]=asm["dynCall_iidiiii"];var dynCall_iii=Module["dynCall_iii"]=asm["dynCall_iii"];var dynCall_iiii=Module["dynCall_iiii"]=asm["dynCall_iiii"];var dynCall_iiiii=Module["dynCall_iiiii"]=asm["dynCall_iiiii"];var dynCall_v=Module["dynCall_v"]=asm["dynCall_v"];var dynCall_vi=Module["dynCall_vi"]=asm["dynCall_vi"];var dynCall_vii=Module["dynCall_vii"]=asm["dynCall_vii"];var dynCall_viii=Module["dynCall_viii"]=asm["dynCall_viii"];var dynCall_viiiii=Module["dynCall_viiiii"]=asm["dynCall_viiiii"];Module["asm"]=asm;Module["ccall"]=ccall;Module["getValue"]=getValue;Module["getMemory"]=getMemory;Module["UTF8ToString"]=UTF8ToString;Module["stringToUTF8"]=stringToUTF8;Module["addRunDependency"]=addRunDependency;Module["removeRunDependency"]=removeRunDependency;Module["FS_createFolder"]=FS.createFolder;Module["FS_createPath"]=FS.createPath;Module["FS_createDataFile"]=FS.createDataFile;Module["FS_createPreloadedFile"]=FS.createPreloadedFile;Module["FS_createLazyFile"]=FS.createLazyFile;Module["FS_createLink"]=FS.createLink;Module["FS_createDevice"]=FS.createDevice;Module["FS_unlink"]=FS.unlink;if(memoryInitializer){if(!isDataURI(memoryInitializer)){memoryInitializer=locateFile(memoryInitializer)}if(ENVIRONMENT_IS_NODE||ENVIRONMENT_IS_SHELL){var data=Module["readBinary"](memoryInitializer);HEAPU8.set(data,GLOBAL_BASE)}else{addRunDependency("memory initializer");var applyMemoryInitializer=function(data){if(data.byteLength)data=new Uint8Array(data);HEAPU8.set(data,GLOBAL_BASE);if(Module["memoryInitializerRequest"])delete Module["memoryInitializerRequest"].response;removeRunDependency("memory initializer")};var doBrowserLoad=function(){Module["readAsync"](memoryInitializer,applyMemoryInitializer,function(){throw"could not load memory initializer "+memoryInitializer})};var memoryInitializerBytes=tryParseAsDataURI(memoryInitializer);if(memoryInitializerBytes){applyMemoryInitializer(memoryInitializerBytes.buffer)}else if(Module["memoryInitializerRequest"]){var useRequest=function(){var request=Module["memoryInitializerRequest"];var response=request.response;if(request.status!==200&&request.status!==0){var data=tryParseAsDataURI(Module["memoryInitializerRequestURL"]);if(data){response=data.buffer}else{console.warn("a problem seems to have happened with Module.memoryInitializerRequest, status: "+request.status+", retrying "+memoryInitializer);doBrowserLoad();return}}applyMemoryInitializer(response)};if(Module["memoryInitializerRequest"].response){setTimeout(useRequest,0)}else{Module["memoryInitializerRequest"].addEventListener("load",useRequest)}}else{doBrowserLoad()}}}function ExitStatus(status){this.name="ExitStatus";this.message="Program terminated with exit("+status+")";this.status=status}ExitStatus.prototype=new Error;ExitStatus.prototype.constructor=ExitStatus;var calledMain=false;dependenciesFulfilled=function runCaller(){if(!Module["calledRun"])run();if(!Module["calledRun"])dependenciesFulfilled=runCaller};Module["callMain"]=function callMain(args){args=args||[];ensureInitRuntime();var argc=args.length+1;var argv=stackAlloc((argc+1)*4);HEAP32[argv>>2]=allocateUTF8OnStack(Module["thisProgram"]);for(var i=1;i<argc;i++){HEAP32[(argv>>2)+i]=allocateUTF8OnStack(args[i-1])}HEAP32[(argv>>2)+argc]=0;try{var ret=Module["_main"](argc,argv,0);exit(ret,true)}catch(e){if(e instanceof ExitStatus){return}else if(e=="SimulateInfiniteLoop"){Module["noExitRuntime"]=true;return}else{var toLog=e;if(e&&typeof e==="object"&&e.stack){toLog=[e,e.stack]}err("exception thrown: "+toLog);Module["quit"](1,e)}}finally{calledMain=true}};function run(args){args=args||Module["arguments"];if(runDependencies>0){return}preRun();if(runDependencies>0)return;if(Module["calledRun"])return;function doRun(){if(Module["calledRun"])return;Module["calledRun"]=true;if(ABORT)return;ensureInitRuntime();preMain();if(Module["onRuntimeInitialized"])Module["onRuntimeInitialized"]();if(Module["_main"]&&shouldRunNow)Module["callMain"](args);postRun()}if(Module["setStatus"]){Module["setStatus"]("Running...");setTimeout(function(){setTimeout(function(){Module["setStatus"]("")},1);doRun()},1)}else{doRun()}}Module["run"]=run;function exit(status,implicit){if(implicit&&Module["noExitRuntime"]&&status===0){return}if(Module["noExitRuntime"]){}else{ABORT=true;EXITSTATUS=status;exitRuntime();if(Module["onExit"])Module["onExit"](status)}Module["quit"](status,new ExitStatus(status))}function abort(what){if(Module["onAbort"]){Module["onAbort"](what)}if(what!==undefined){out(what);err(what);what=JSON.stringify(what)}else{what=""}ABORT=true;EXITSTATUS=1;throw"abort("+what+"). Build with -s ASSERTIONS=1 for more info."}Module["abort"]=abort;if(Module["preInit"]){if(typeof Module["preInit"]=="function")Module["preInit"]=[Module["preInit"]];while(Module["preInit"].length>0){Module["preInit"].pop()()}}var shouldRunNow=true;if(Module["noInitialRun"]){shouldRunNow=false}Module["noExitRuntime"]=true;run();
 `
+
+// anthropic
+
+import { Event, Relay, SimplePool } from 'nostr-tools'
+
+const CHUNK_SIZE = 100 * 1024 // 100KB
+
+// Send a large payload in chunks
+export async function sendPayload(ndk, payload: ArrayBuffer) {
+  const chunks = chunkPayload(payload)
+  
+	chunks.forEach( (chunk, index, array) => {
+    const event = createChunkEvent(chunk)
+    await relay.publish(event)
+  })
+}
+
+// Receive a payload from chunk events  
+async function receivePayload(pool: SimplePool, filter: any): Promise<ArrayBuffer> {
+  const chunks: ArrayBuffer[] = []
+
+  const sub = pool.sub(relays, [filter])
+
+  for await (const event of sub.events) {
+    if (isValidChunkEvent(event)) {
+      chunks.push(getChunkData(event))  
+    }
+  }
+
+  sub.unsub()
+
+  return joinChunks(chunks)
+}
+
+// Helper to chunk up a large payload  
+function chunkPayload(payload: ArrayBuffer): ArrayBuffer[] {
+  const chunks: ArrayBuffer[] = []
+  let offset = 0
+
+  while(offset < payload.byteLength) {
+    const chunk = payload.slice(offset, offset + CHUNK_SIZE)
+    chunks.push(chunk)
+    offset += CHUNK_SIZE
+  }
+
+  return chunks
+}
+
+// Create a Nostr event to send a chunk
+function createChunkEvent(chunk: ArrayBuffer): Event {
+
+  // Convert chunk to base64 string
+  const base64 = base64Encode(chunk)
+
+  // Create event
+  const event: Event = {
+    kind: 12345, // custom kind for chunks
+    tags: [],
+    created_at: Date.now()/1000, 
+    pubkey: myPubKey,
+    content: JSON.stringify({
+      chunkId: nextChunkId++,
+      data: base64,
+      // other metadata
+    }), 
+    id: '', // will be calculated
+    sig: ''  // will be signed
+  }
+
+  // Sign event
+  event.id = getEventHash(event)
+  event.sig = signEvent(event, myPrivKey)
+
+  return event
+}
+
+// Helper function to base64 encode ArrayBuffer
+function base64Encode(buffer: ArrayBuffer) {
+  //...
+}
+
+// Check if event contains a valid chunk
+function isValidChunkEvent(event: Event): boolean {
+  // ... validate chunk event
+  return true
+}
+
+// Extract chunk data from event 
+function getChunkData(event: Event): ArrayBuffer {
+  // ... decrypt and extract chunk data
+  return chunkData
+}
+
+// Join all chunks back into the original payload
+function joinChunks(chunks: ArrayBuffer[]): ArrayBuffer {
+  const fullPayload = new ArrayBuffer(chunks.reduce((a, c) => a + c.byteLength, 0))
+  
+  let offset = 0
+  for (const chunk of chunks) {
+    new Uint8Array(fullPayload).set(new Uint8Array(chunk), offset)
+    offset += chunk.byteLength
+  }
+
+  return fullPayload
+}
+
+// Get uploaded file from input element
+// const input = document.getElementById('fileInput') as HTMLInputElement
+// const file = input.files![0]
+
+// // Read file into ArrayBuffer
+// const reader = new FileReader()
+// reader.readAsArrayBuffer(file) 
+
+// reader.onload = () => {
+//   const arrayBuffer = reader.result as ArrayBuffer
+
+//   // Send array buffer to be chunked and sent
+//   sendPayload(relay, arrayBuffer) 
+// }
