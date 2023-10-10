@@ -7,6 +7,8 @@ export const Retrieve = () => {
   const neventRef = useRef<HTMLInputElement>(null)
   const [gettingGame, setGettingGame] = useState(false)
 
+  console.log('ndk',ndk)
+
   const getGame = async () => {
     if (gettingGame) return
     setGettingGame(true)

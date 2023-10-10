@@ -1,10 +1,15 @@
-import { useRef } from 'react'
+import { useContext, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { sha256 } from '@noble/hashes/sha256'
+import { publishGame } from '../libraries/PublishGame'
+import { NDKContext } from '../providers/NDKProvider'
+
 
 export const Publish = () => {
   const navigate = useNavigate()
   const uploadRef = useRef<HTMLInputElement>(null)
+  const titleRef = useRef<HTMLInputElement>(null)
+  const contentRef = useRef<HTMLTextAreaElement>(null)
+  const ndk = useContext(NDKContext)
 
   const publish = async () => {
     if (uploadRef.current?.files === null) return
@@ -14,7 +19,7 @@ export const Publish = () => {
       reader.readAsArrayBuffer(file)
       reader.onload = async () => {
         const buffer = reader.result as ArrayBuffer
-        sendPayload(ndk, buffer)
+        publishGame(ndk, content, buffer)
       }
     }
   }
@@ -32,7 +37,10 @@ export const Publish = () => {
       <p className="left">
         Select the HTML and JavaScript files that make up your game.
       </p>
-      <input ref={uploadRef} type="file" multiple />&nbsp;
+      <input ref={uploadRef} type="file" multiple />
+      <br/>
+      <input ref={titleRef} placeholder="Enter game title" />
+      <textarea ref={contentRef} placeholder="Enter game description" />
       <button onClick={publish}>Publish 🚀</button>
     </div>
     <br/>
