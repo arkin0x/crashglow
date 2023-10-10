@@ -24,6 +24,14 @@ export const Publish = () => {
     <>
     <div className="card">
       <h1>Publish a game</h1>
+      <h2 className="left">Supported web game formats:</h2>
+      <ul>
+        <li>PICO-8 Web Export</li>
+        <li><em>Maybe</em> other HTML/JS games. Give it a shot!</li>
+      </ul>
+      <p className="left">
+        Select the HTML and JavaScript files that make up your game.
+      </p>
       <input ref={uploadRef} type="file" multiple />&nbsp;
       <button onClick={publish}>Publish 🚀</button>
     </div>

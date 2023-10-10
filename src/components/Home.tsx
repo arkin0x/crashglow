@@ -7,7 +7,8 @@ export const Home = () => {
   return (
     <div id="component-home">
       <h1>Crashglow</h1>
-      <h2>Web games on nostr</h2>
+      <h2>Distributed Arcade on Nostr</h2>
+      <h3>Powered by Magic Internet Money!</h3>
       <Retrieve/>
       <hr/>
       <button type="button" onClick={() => navigate('/publish')}>Publish ✨</button>
