@@ -1,7 +1,8 @@
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk'
-import { html, js } from '../assets/ExampleGameHTMLJS.ts'
-import { Event, SimplePool } from 'nostr-tools'
+// import { html, js } from '../assets/ExampleGameHTMLJS.ts'
+import { nip19 } from 'nostr-tools'
 import { sha256 } from '@noble/hashes/sha256'
+import { bytesToHex } from "@noble/hashes/utils"
 
 type NDKType = typeof NDK
 
@@ -13,29 +14,41 @@ export const JS = 5394
 
 const CHUNK_SIZE = 100 * 1024 // 100KB
 
-export const publishGame = async (ndk: NDKType, content, buffer) => {
+export const publishGame = async (ndk: NDKType, title: string, content: string, buffer: ArrayBuffer, file: File) => {
 	// publish kind1, get id
-  const kind1id = await publishKind1(ndk, content)
-  sendPayload(ndk, buffer, kind1id)
+  const kind1 = await publishKind1(ndk, title, content)
+
+  const nevent = await nip19.neventEncode({
+    id: kind1.id,
+    relays: ndk.explicitRelayUrls,
+    author: kind1.pubkey,
+    kind: 1
+  } as nip19.EventPointer)
+
+  sendPayload(ndk, buffer, file, kind1.id, nevent)
+
+  return nevent
 }
 
-const publishKind1 = async (ndk: NDKType, content: string) => {
+const publishKind1 = async (ndk: NDKType, title: string, content: string) => {
   const ndkEvent = new NDKEvent(ndk)
+  ndkEvent.tags.push(['subject', title])
   ndkEvent.kind = 1
   ndkEvent.content = content
   const res = await ndkEvent.publish()
   // res is relay info, not event. just inspect the same event object.
   console.log(res, ndkEvent, ndkEvent.id)
-	return ndkEvent.id
+	return ndkEvent
 }
 
 // Send a large payload in chunks
-export async function sendPayload(ndk: NDKType, payload: ArrayBuffer, referenceID: string) {
+export async function sendPayload(ndk: NDKType, payload: ArrayBuffer, file: File, referenceID: string, nevent: string) {
   const chunks = chunkPayload(payload)
   
 	chunks.forEach( async (chunk, index) => {
-    const event = createChunkEvent(ndk, chunk, index, referenceID)
-    await relay.publish(event)
+    const hash = bytesToHex(sha256(new Uint8Array(payload)))
+    const event = createChunkEvent(ndk, chunk, index, file, referenceID, nevent, hash)
+    await event.publish()
   })
 }
 
@@ -54,96 +67,73 @@ function chunkPayload(payload: ArrayBuffer): ArrayBuffer[] {
 }
 
 // Create a Nostr event to send a chunk
-function createChunkEvent(ndk: NDKType, chunk: ArrayBuffer, index: number, referenceID): Event {
+function createChunkEvent(ndk: NDKType, chunk: ArrayBuffer, index: number, file: File, referenceID: string, nevent: string, hash: string): NDKEvent {
   // Convert chunk to base64 string
   const base64 = base64Encode(chunk)
 
   const ndkEvent = new NDKEvent(ndk)
   ndkEvent.kind = BLOB
   ndkEvent.content = base64
-  ndkEvent.tags.push(['e', referenceID, ])
+  ndkEvent.tags.push(['e', referenceID, ndk.explicitRelayUrls[0], "root" ])
+  ndkEvent.tags.push(['m', file.type])
+  ndkEvent.tags.push(['alt', `This is a binary chunk of a web-based video game. Play the full game at https://crashglow.com/play/${nevent}`])
+  ndkEvent.tags.push(['index', index.toString()])
+  ndkEvent.tags.push(['x', hash])
 
-
-  // Create event
-  const event: Event = {
-    kind: BLOB, // custom blob kind for chunks
-    tags: [],
-    created_at: Date.now()/1000, 
-    pubkey: myPubKey,
-    content: JSON.stringify({
-      chunkId: nextChunkId++,
-      data: base64,
-      // other metadata
-    }), 
-    id: '', // will be calculated
-    sig: ''  // will be signed
-  }
-
-  // Sign event
-  event.id = getEventHash(event)
-  event.sig = signEvent(event, myPrivKey)
-
-  return event
-}
-
-export const publishTestEvent = async (ndk: NDKType, c, k ) => {
-  const ndkEvent = new NDKEvent(ndk)
-  ndkEvent.kind = k
-  ndkEvent.content = c
-  const res = await ndkEvent.publish()
-  // res is relay info, not event. just inspect the same event object.
-  console.log(res, ndkEvent, ndkEvent.id)
   return ndkEvent
 }
 
-// anthropic
-
 // Receive a payload from chunk events  
-async function receivePayload(pool: SimplePool, filter: any): Promise<ArrayBuffer> {
-  const chunks: ArrayBuffer[] = []
+// async function receivePayload(pool: SimplePool, filter: any): Promise<ArrayBuffer> {
+//   const chunks: ArrayBuffer[] = []
 
-  const sub = pool.sub(relays, [filter])
+//   const sub = pool.sub(relays, [filter])
 
-  for await (const event of sub.events) {
-    if (isValidChunkEvent(event)) {
-      chunks.push(getChunkData(event))  
-    }
-  }
+//   for await (const event of sub.events) {
+//     if (isValidChunkEvent(event)) {
+//       chunks.push(getChunkData(event))  
+//     }
+//   }
 
-  sub.unsub()
+//   sub.unsub()
 
-  return joinChunks(chunks)
-}
+//   return joinChunks(chunks)
+// }
 
 // Helper function to base64 encode ArrayBuffer
-function base64Encode(buffer: ArrayBuffer) {
-  //...
-}
-
-// Check if event contains a valid chunk
-function isValidChunkEvent(event: Event): boolean {
-  // ... validate chunk event
-  return true
-}
-
-// Extract chunk data from event 
-function getChunkData(event: Event): ArrayBuffer {
-  // ... decrypt and extract chunk data
-  return chunkData
-}
-
-// Join all chunks back into the original payload
-function joinChunks(chunks: ArrayBuffer[]): ArrayBuffer {
-  const fullPayload = new ArrayBuffer(chunks.reduce((a, c) => a + c.byteLength, 0))
-  
-  let offset = 0
-  for (const chunk of chunks) {
-    new Uint8Array(fullPayload).set(new Uint8Array(chunk), offset)
-    offset += chunk.byteLength
+function base64Encode(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  let binary = ''
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i])
   }
-
-  return fullPayload
+  return btoa(binary)
 }
+
+// // Check if event contains a valid chunk
+// function isValidChunkEvent(event: Event): boolean {
+//   // ... validate chunk event
+//   return true
+// }
+
+// // Extract chunk data from event 
+// function getChunkData(event: Event): ArrayBuffer {
+//   // ... decrypt and extract chunk data
+//   return chunkData
+// }
+
+// // Join all chunks back into the original payload
+// function joinChunks(chunks: ArrayBuffer[]): ArrayBuffer {
+//   const fullPayload = new ArrayBuffer(chunks.reduce((a, c) => a + c.byteLength, 0))
+  
+//   let offset = 0
+//   for (const chunk of chunks) {
+//     new Uint8Array(fullPayload).set(new Uint8Array(chunk), offset)
+//     offset += chunk.byteLength
+//   }
+
+//   return fullPayload
+// }
 
 // Get uploaded file from input element
 // const input = document.getElementById('fileInput') as HTMLInputElement

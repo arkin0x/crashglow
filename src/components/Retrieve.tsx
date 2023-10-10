@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useContext } from 'react'
 import { nip19 } from 'nostr-tools'
 import { NDKContext } from '../providers/NDKProvider'
 
+// TODO: support NIP19 nevents as well as hex
+
 export const Retrieve = () => {
   const { ndk } = useContext(NDKContext)
   const neventRef = useRef<HTMLInputElement>(null)
