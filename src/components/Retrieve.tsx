@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useContext } from 'react'
 import { nip19 } from 'nostr-tools'
-import './scss/App.scss'
 import { NDKContext } from '../providers/NDKProvider'
 
 export const Retrieve = () => {
@@ -27,25 +26,14 @@ export const Retrieve = () => {
     setGettingGame(false)
   }
 
-  useEffect(() => {
-    const setupNDK = async () => {
-      await ndk.connect()
-    }
-    setupNDK()
-  }, [])
-
   return (
-    <>
-      <h1>Crashglow</h1>
-      <h2>Web games on nostr</h2>
-      <div className="card">
-        <label htmlFor="nevent">Enter game nevent:</label><br/>
-        <br/>
-        <input ref={neventRef} type="text" placeholder="Event name" />
-        <br/>
-        <br/>
-        <button disabled={gettingGame} onClick={getGame}>Play</button>
-      </div>
-    </>
+    <div className="card">
+      <label htmlFor="nevent">Enter game nevent:</label><br/>
+      <br/>
+      <input ref={neventRef} type="text" placeholder="Event name" />
+      <br/>
+      <br/>
+      <button disabled={gettingGame} onClick={getGame}>Play</button>
+    </div>
   )
 }
