@@ -1,18 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap');
+
 html, body {
-  background: url(../assets/dashglow7.png) no-repeat center center;
+  cursor: crosshair;
+  background: url(../assets/arcade-bg-2.png) no-repeat center center;
   background-size: cover;
   font-size: 18px;
 }
 
 #root {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#app {
   background-color: #000c;
   // blur filter on background
   backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  max-width: 1280px;
-  margin: 0 auto;
+  border-radius: 0.2rem;
   padding: 2rem;
-  text-align: center;
+  margin-bottom: 10vh;
+  transition: all 500ms ease-in;
+}
+
+#app:hover {
+  box-shadow: 0 0 30px 50px rgba(79, 12, 141, 0.2);
+  transition: all 500ms ease-in;
+  background-color: #1116;
 }
 
 .logo {
@@ -59,4 +73,15 @@ input {
   font-size: 1em;
   font-weight: 500;
   padding: 0.6em 1.2em;
+}
+
+hr {
+  border: 1px dashed #aa62da;
+  margin: -0.5em 0 2em 0;
+}
+
+h1, button {
+  font-family: 'Dela Gothic One', sans-serif;
+  text-transform: uppercase;
+  font-style: italic;
 }

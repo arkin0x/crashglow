@@ -1,7 +1,9 @@
 import { useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { sha256 } from '@noble/hashes/sha256'
 
 export const Publish = () => {
+  const navigate = useNavigate()
   const uploadRef = useRef<HTMLInputElement>(null)
 
   const publish = async () => {
@@ -19,10 +21,16 @@ export const Publish = () => {
   ///////////////
 
   return (
+    <>
     <div className="card">
-      <h2>Publish a game</h2>
-      <input ref={uploadRef} type="file" multiple />
-      <button onClick={publish}>Publish</button>
+      <h1>Publish a game</h1>
+      <input ref={uploadRef} type="file" multiple />&nbsp;
+      <button onClick={publish}>Publish 🚀</button>
     </div>
+    <br/>
+    <br/>
+    <hr/>
+    <button onClick={() => navigate('/')}>⏮ Go Back</button>
+    </>
   )
 }

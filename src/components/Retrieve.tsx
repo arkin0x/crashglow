@@ -33,7 +33,7 @@ export const Retrieve = () => {
       <input ref={neventRef} type="text" placeholder="Event name" />
       <br/>
       <br/>
-      <button disabled={gettingGame} onClick={getGame}>Play</button>
+      <button disabled={gettingGame} onClick={getGame}>Play 🕹️</button>
     </div>
   )
 }
