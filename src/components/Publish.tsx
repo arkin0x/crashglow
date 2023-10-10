@@ -1,4 +1,4 @@
-import { useContext, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { publishGame } from '../libraries/PublishGame'
 import { NDKContext } from '../providers/NDKProvider'
@@ -12,7 +12,10 @@ export const Publish = () => {
   const contentRef = useRef<HTMLTextAreaElement>(null)
   const ndk = useContext(NDKContext)
 
+  useEffect
+
   const publish = async () => {
+    if (ndk === null) return
     if (uploadRef.current?.files === null) return
     if (contentRef.current?.value === null) return
     if (titleRef.current?.value === null) return

@@ -35,6 +35,7 @@ const publishKind1 = async (ndk: NDKType, title: string, content: string) => {
   ndkEvent.tags.push(['subject', title])
   ndkEvent.kind = 1
   ndkEvent.content = content
+  console.log('publishing kind1...')
   const res = await ndkEvent.publish()
   // res is relay info, not event. just inspect the same event object.
   console.log(res, ndkEvent, ndkEvent.id)

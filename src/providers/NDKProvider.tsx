@@ -7,14 +7,16 @@ const ndkRef = new NDK({
   explicitRelayUrls: ["wss://dashglow-test.nostr1.com"]//,"wss://relay.damus.io"]
 })
 
-export const NDKContext = createContext({ndk: ndkRef})
+type NDKContextType = NDK
+
+export const NDKContext = createContext<NDKContextType>(ndkRef)
 
 type NDKProviderProps = {
   children: React.ReactNode
 }
 
 export const NDKProvider: React.FC<NDKProviderProps> = ({ children }) => {
-  const [ndk, setNDK] = useState(null)
+  const [ndk, setNDK] = useState()
 
   useEffect(() => {
     const setupNDK = async () => {
@@ -25,7 +27,7 @@ export const NDKProvider: React.FC<NDKProviderProps> = ({ children }) => {
   }, [])
 
   return (
-    <NDKContext.Provider value={{ndk}}>
+    <NDKContext.Provider value={ndk}>
       {children}
     </NDKContext.Provider>
   )
