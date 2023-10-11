@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, useContext } from 'react'
+import { useRef, useState, useContext } from 'react'
 import { nip19 } from 'nostr-tools'
 import { NDKContext } from '../providers/NDKProvider'
+import { canDecode, isHex } from '../libraries/utils'
+import { BLOB, stitchChunks } from '../libraries/PublishGame'
 
 // TODO: support NIP19 nevents as well as hex
 
@@ -25,9 +27,11 @@ export const Retrieve = () => {
       setGettingGame(false)
       return
     }
-    const game = await ndk.fetchEvent({ ids: [decoded] })
+    const game = await ndk.fetchEvents({ "#e": [decoded], "kinds": [BLOB] })
     console.log(game)
     setGettingGame(false)
+    let res = stitchChunks(game)
+    console.log('stitched game assets',res)
   }
 
   return (

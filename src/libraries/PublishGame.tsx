@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from "@noble/hashes/utils"
+import { getTag } from './utils';
 
 type NDKType = typeof NDK
 
@@ -118,42 +119,51 @@ function base64Encode(buffer: ArrayBuffer): string {
   return btoa(binary)
 }
 
-// // Check if event contains a valid chunk
-// function isValidChunkEvent(event: Event): boolean {
-//   // ... validate chunk event
-//   return true
-// }
+// reassemble game assets from chunks
+export const stitchChunks = (events: Set<NDKEvent>): string[] => {
+  // Group events by hash
+  const groups = new Map<string, NDKEvent[]>()
+  for (const event of events) {
+    const hash = event.tags.find(getTag('x'))[1]
+    const group = groups.get(hash) ?? []
+    group.push(event)
+    groups.set(hash, group)
+  }
 
-// // Extract chunk data from event 
-// function getChunkData(event: Event): ArrayBuffer {
-//   // ... decrypt and extract chunk data
-//   return chunkData
-// }
+  // Sort events within each group by index
+  for (const group of groups.values()) {
+    group.sort((a, b) => a.tags.find(getTag('index'))[1] - b.tags.find(getTag('index'))[1])
+  }
 
-// // Join all chunks back into the original payload
-// function joinChunks(chunks: ArrayBuffer[]): ArrayBuffer {
-//   const fullPayload = new ArrayBuffer(chunks.reduce((a, c) => a + c.byteLength, 0))
-  
-//   let offset = 0
-//   for (const chunk of chunks) {
-//     new Uint8Array(fullPayload).set(new Uint8Array(chunk), offset)
-//     offset += chunk.byteLength
-//   }
+  // Stitch chunks together within each group
+  const result: string[] = []
+  for (const group of groups.values()) {
+    const chunks = group.map((event) => base64Decode(event.content))
+    const fullPayload = joinChunks(chunks)
+    const text = new TextDecoder().decode(fullPayload)
+    result.push(text)
+  }
 
-//   return fullPayload
-// }
+  return result
+}
 
-// Get uploaded file from input element
-// const input = document.getElementById('fileInput') as HTMLInputElement
-// const file = input.files![0]
+// Helper function to base64 decode string
+function base64Decode(str: string): Uint8Array {
+  const binary = atob(str)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return bytes
+}
 
-// // Read file into ArrayBuffer
-// const reader = new FileReader()
-// reader.readAsArrayBuffer(file) 
-
-// reader.onload = () => {
-//   const arrayBuffer = reader.result as ArrayBuffer
-
-//   // Send array buffer to be chunked and sent
-//   sendPayload(relay, arrayBuffer) 
-// }
+function joinChunks(chunks: Uint8Array[]): Uint8Array {
+  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
+  const result = new Uint8Array(totalLength)
+  let offset = 0
+  for (const chunk of chunks) {
+    result.set(chunk, offset)
+    offset += chunk.length
+  }
+  return result
+}
