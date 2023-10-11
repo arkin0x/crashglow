@@ -1,9 +1,8 @@
-import { useContext, useEffect, useRef } from 'react'
+import { useState, useContext, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { publishGame } from '../libraries/PublishGame'
 import { NDKContext } from '../providers/NDKProvider'
 import '../scss/Publish.scss'
-
 
 export const Publish = () => {
   const navigate = useNavigate()
@@ -11,8 +10,6 @@ export const Publish = () => {
   const titleRef = useRef<HTMLInputElement>(null)
   const contentRef = useRef<HTMLTextAreaElement>(null)
   const ndk = useContext(NDKContext)
-
-  useEffect
 
   const publish = async () => {
     if (ndk === null) return

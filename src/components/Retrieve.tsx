@@ -5,7 +5,7 @@ import { NDKContext } from '../providers/NDKProvider'
 // TODO: support NIP19 nevents as well as hex
 
 export const Retrieve = () => {
-  const { ndk } = useContext(NDKContext)
+  const ndk = useContext(NDKContext)
   const neventRef = useRef<HTMLInputElement>(null)
   const [gettingGame, setGettingGame] = useState(false)
 
