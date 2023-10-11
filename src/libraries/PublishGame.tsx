@@ -16,7 +16,7 @@ export const JS = 5394
 
 const CHUNK_SIZE = 100 * 1024 // 100KB
 
-export const publishGame = async (ndk: NDKType, buffer: ArrayBuffer, file: File, kind1: NDKEvent) => {
+export const publishGame = async (ndk: NDKType, base64: string, file: File, kind1: NDKEvent) => {
 
   const nevent = await nip19.neventEncode({
     id: kind1.id,
@@ -25,7 +25,7 @@ export const publishGame = async (ndk: NDKType, buffer: ArrayBuffer, file: File,
     kind: 1
   } as nip19.EventPointer)
 
-  sendPayload(ndk, buffer, file, kind1.id, nevent)
+  sendPayload(ndk, base64, file, kind1.id, nevent)
 
   return nevent
 }
@@ -50,11 +50,17 @@ export const publishKind1 = async (ndk: NDKType, title: string, content: string)
 }
 
 // Send a large payload in chunks
-export async function sendPayload(ndk: NDKType, payload: ArrayBuffer, file: File, referenceID: string, nevent: string) {
-  const chunks = chunkPayload(payload)
+export async function sendPayload(ndk: NDKType, base64: string, file: File, referenceID: string, nevent: string) {
+  const chunks = chunkPayload(base64)
   
+  // get the hash of the file; this serves as an identifier for the file
+  const plaintext = atob(base64)
+  // console.log('plaintext',plaintext) // the file is intact!
+  const binarytext = (new TextEncoder()).encode(plaintext)
+  const hash = bytesToHex(sha256(binarytext))
+
+  // create an event for each chunk
 	chunks.forEach( async (chunk, index) => {
-    const hash = bytesToHex(sha256(new Uint8Array(payload)))
     const event = createChunkEvent(ndk, chunk, index, file, referenceID, nevent, hash)
     await event.publish()
     console.log('published chunk', index, event)
@@ -62,12 +68,12 @@ export async function sendPayload(ndk: NDKType, payload: ArrayBuffer, file: File
 }
 
 // Helper to chunk up a large payload from ArrayBuffer into Array of ArrayBuffers
-function chunkPayload(payload: ArrayBuffer): ArrayBuffer[] {
-  const chunks: ArrayBuffer[] = []
+function chunkPayload(base64:string): string[] {
+  const chunks: string[] = []
   let offset = 0
 
-  while(offset < payload.byteLength) {
-    const chunk = payload.slice(offset, offset + CHUNK_SIZE)
+  while(offset < base64.length) {
+    const chunk = base64.slice(offset, offset + CHUNK_SIZE)
     chunks.push(chunk)
     offset += CHUNK_SIZE
   }
@@ -76,13 +82,12 @@ function chunkPayload(payload: ArrayBuffer): ArrayBuffer[] {
 }
 
 // Create a Nostr event to send a chunk
-function createChunkEvent(ndk: NDKType, chunk: ArrayBuffer, index: number, file: File, referenceID: string, nevent: string, hash: string): NDKEvent {
+function createChunkEvent(ndk: NDKType, chunk: string, index: number, file: File, referenceID: string, nevent: string, hash: string): NDKEvent {
   // Convert chunk to base64 string
-  const base64 = base64Encode(chunk)
 
   const ndkEvent = new NDKEvent(ndk)
   ndkEvent.kind = BLOB
-  ndkEvent.content = base64
+  ndkEvent.content = chunk 
   ndkEvent.tags.push(['e', referenceID, ndk.explicitRelayUrls[0], "root" ])
   ndkEvent.tags.push(['m', file.type])
   ndkEvent.tags.push(['alt', `This is a binary chunk of a web-based video game. Play the full game at https://crashglow.com/play/${nevent}`])
@@ -138,10 +143,10 @@ export const stitchChunks = (events: Set<NDKEvent>): string[] => {
   // Stitch chunks together within each group
   const result: string[] = []
   for (const group of groups.values()) {
-    const chunks = group.map((event) => base64Decode(event.content))
-    const fullPayload = joinChunks(chunks)
-    const text = new TextDecoder().decode(fullPayload)
-    result.push(text)
+    const chunks = group.map((event) => atob(event.content))
+    // const fullPayload = joinChunks(chunks)
+    // const text = new TextDecoder().decode(fullPayload)
+    result.push(chunks.join(''))
   }
 
   return result

@@ -25,10 +25,10 @@ export const Publish = () => {
 
     for (const file of uploadRef.current!.files) {
       const reader = new FileReader()
-      reader.readAsArrayBuffer(file)
+      reader.readAsDataURL(file)
       reader.onload = async () => {
-        const buffer = reader.result as ArrayBuffer
-        const nevent = await publishGame(ndk, buffer, file, kind1)
+        const base64 = reader.result.split(',')[1]
+        const nevent = await publishGame(ndk, base64, file, kind1)
         // navigate(`/play/${nevent}`)
       }
     }
