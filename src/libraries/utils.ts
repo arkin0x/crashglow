@@ -21,3 +21,17 @@ export const getTagValue = (key: string, value: string): FindTag => {
     return tag && Array.isArray(tag) && tag[0] === key && tag[1] === value
   }
 }
+
+// pico-8
+export const replaceScript = (html: string, script: string): string => {
+  // replace `` in javascript file
+  const fixedScript = script.replace(/`/g, '\\`')
+  const regex = /e\.src\s*=\s*"(.+?)";/
+  const match = regex.exec(html)
+  if (match) {
+    const replacement = `e.text = \`${fixedScript}\`;`
+    return html.replace(match[0], replacement)
+  } else {
+    return html
+  }
+}

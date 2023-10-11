@@ -125,28 +125,28 @@ function base64Encode(buffer: ArrayBuffer): string {
 }
 
 // reassemble game assets from chunks
-export const stitchChunks = (events: Set<NDKEvent>): string[] => {
-  // Group events by hash
-  const groups = new Map<string, NDKEvent[]>()
+export const stitchChunks = (events: Set<NDKEvent>): { [unique: string]: string } => {
+  // Group events by hash and mime
+  const groups: { [unique: string]: NDKEvent[] } = {}
   for (const event of events) {
     const hash = event.tags.find(getTag('x'))[1]
-    const group = groups.get(hash) ?? []
+    const mime = event.tags.find(getTag('m'))[1]
+    const unique = `${mime}:${hash}`
+    const group = groups[unique] ?? []
     group.push(event)
-    groups.set(hash, group)
+    groups[unique] = group
   }
 
   // Sort events within each group by index
-  for (const group of groups.values()) {
+  for (const group of Object.values(groups)) {
     group.sort((a, b) => a.tags.find(getTag('index'))[1] - b.tags.find(getTag('index'))[1])
   }
 
   // Stitch chunks together within each group
-  const result: string[] = []
-  for (const group of groups.values()) {
+  const result: { [unique: string]: string } = {}
+  for (const [unique, group] of Object.entries(groups)) {
     const chunks = group.map((event) => atob(event.content))
-    // const fullPayload = joinChunks(chunks)
-    // const text = new TextDecoder().decode(fullPayload)
-    result.push(chunks.join(''))
+    result[unique] = chunks.join('')
   }
 
   return result
