@@ -1,6 +1,6 @@
-import { useState, useContext, useEffect, useRef } from 'react'
+import { useContext, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { publishGame } from '../libraries/PublishGame'
+import { publishGame, publishKind1 } from '../libraries/PublishGame'
 import { NDKContext } from '../providers/NDKProvider'
 import '../scss/Publish.scss'
 
@@ -12,22 +12,27 @@ export const Publish = () => {
   const ndk = useContext(NDKContext)
 
   const publish = async () => {
+    console.log('call to publish')
     if (ndk === null) return
     if (uploadRef.current?.files === null) return
     if (contentRef.current?.value === null) return
     if (titleRef.current?.value === null) return
+
     console.log(uploadRef.current!.files)
+
+    // publish kind1, get id
+    const kind1 = await publishKind1(ndk, titleRef.current!.value, contentRef.current!.value)
+
     for (const file of uploadRef.current!.files) {
       const reader = new FileReader()
       reader.readAsArrayBuffer(file)
       reader.onload = async () => {
         const buffer = reader.result as ArrayBuffer
-        const nevent = await publishGame(ndk, titleRef.current!.value, contentRef.current!.value, buffer, file)
-        navigate(`/play/${nevent}`)
+        const nevent = await publishGame(ndk, buffer, file, kind1)
+        // navigate(`/play/${nevent}`)
       }
     }
   }
-  ///////////////
 
   return (
     <>

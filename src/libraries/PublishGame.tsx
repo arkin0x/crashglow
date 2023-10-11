@@ -1,4 +1,5 @@
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk'
+import { v4 as uuidv4 } from 'uuid';
 // import { html, js } from '../assets/ExampleGameHTMLJS.ts'
 import { nip19 } from 'nostr-tools'
 import { sha256 } from '@noble/hashes/sha256'
@@ -14,9 +15,7 @@ export const JS = 5394
 
 const CHUNK_SIZE = 100 * 1024 // 100KB
 
-export const publishGame = async (ndk: NDKType, title: string, content: string, buffer: ArrayBuffer, file: File) => {
-	// publish kind1, get id
-  const kind1 = await publishKind1(ndk, title, content)
+export const publishGame = async (ndk: NDKType, buffer: ArrayBuffer, file: File, kind1: NDKEvent) => {
 
   const nevent = await nip19.neventEncode({
     id: kind1.id,
@@ -30,9 +29,16 @@ export const publishGame = async (ndk: NDKType, title: string, content: string, 
   return nevent
 }
 
-const publishKind1 = async (ndk: NDKType, title: string, content: string) => {
+export const publishKind1 = async (ndk: NDKType, title: string, content: string) => {
+  const uuid = uuidv4();
+  // TODO: get semver from user input
+  const semver = "0.1.0"
   const ndkEvent = new NDKEvent(ndk)
   ndkEvent.tags.push(['subject', title])
+  ndkEvent.tags.push(['u', `${uuid}:${semver}`])
+  ndkEvent.tags.push(['relays', ...ndk.explicitRelayUrls])
+  // TODO: replace domain
+  ndkEvent.tags.push(['alt', `This note represents the box of a a web-based video game. Play it at https://domain.com/game/${uuid}:${semver}`])
   ndkEvent.kind = 1
   ndkEvent.content = content
   console.log('publishing kind1...')
@@ -50,6 +56,7 @@ export async function sendPayload(ndk: NDKType, payload: ArrayBuffer, file: File
     const hash = bytesToHex(sha256(new Uint8Array(payload)))
     const event = createChunkEvent(ndk, chunk, index, file, referenceID, nevent, hash)
     await event.publish()
+    console.log('published chunk', index, event)
   })
 }
 

@@ -462,10 +462,10 @@
     nostr-tools "^1.7.5"
     websocket-polyfill "^0.0.3"
 
-"@nostr-dev-kit/ndk@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@nostr-dev-kit/ndk/-/ndk-1.3.1.tgz#65869098ba2145ebcbdac8c2a0a1c92808d74715"
-  integrity sha512-BVqhL2qU0kFL0YHTXLBbzPSvmGbY/ivL9M4k7ZmqYHHCd3Vwd9eMAgxq4kkCsHc4KoSeOB3NCLFKdjLdUB+5Pg==
+"@nostr-dev-kit/ndk@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@nostr-dev-kit/ndk/-/ndk-1.3.2.tgz#22aab1c3706a142e4f6a7b691ee26419d7af85f2"
+  integrity sha512-8uXYGQWiYJE4nbd+dSOuFwLR55mRSkhCaxwBLhM7TBakz/bj0AcvhISgD3NxwVzPH/xLns0tyb17K3xoxODURQ==
   dependencies:
     "@noble/hashes" "^1.3.1"
     "@noble/secp256k1" "^2.0.0"
@@ -1848,6 +1848,11 @@ utf8-buffer@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/utf8-buffer/-/utf8-buffer-1.0.0.tgz#457e7d848d4d9cd873772b710d150565f6e543d9"
   integrity sha512-ueuhzvWnp5JU5CiGSY4WdKbiN/PO2AZ/lpeLiz2l38qwdLy/cW40XobgyuIWucNyum0B33bVB0owjFCeGBSLqg==
+
+uuid@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
+  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 vite@^4.4.5:
   version "4.4.9"
