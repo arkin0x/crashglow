@@ -1,13 +1,14 @@
-export const P8_BUTTON_O = {action:'button', code: 0x10};
-export const P8_BUTTON_X = {action:'button', code: 0x20};
-export const P8_DPAD_LEFT = {action:'button', code: 0x1};
-export const P8_DPAD_RIGHT = {action:'button', code: 0x2};
-export const P8_DPAD_UP = {action:'button', code: 0x4};
-export const P8_DPAD_DOWN = {action:'button', code: 0x8};
-export const P8_MENU = {action:'menu'};
-export const P8_NO_ACTION = {action:'none'};
+export type Button = {action: 'button' | 'menu' | 'none', code?: number};
+export const P8_BUTTON_O: Button = {action:'button', code: 0x10};
+export const P8_BUTTON_X: Button = {action:'button', code: 0x20};
+export const P8_DPAD_LEFT: Button = {action:'button', code: 0x1};
+export const P8_DPAD_RIGHT: Button = {action:'button', code: 0x2};
+export const P8_DPAD_UP: Button = {action:'button', code: 0x4};
+export const P8_DPAD_DOWN: Button = {action:'button', code: 0x8};
+export const P8_MENU: Button = {action:'menu'};
+export const P8_NO_ACTION: Button = {action:'none'};
 
-export const P8_BUTTON_MAPPING = [
+export const P8_BUTTON_MAPPING: Button[] = [
   // ref: https://w3c.github.io/gamepad/#remapping
   P8_BUTTON_O,          // Bottom face button
   P8_BUTTON_X,          // Right face button

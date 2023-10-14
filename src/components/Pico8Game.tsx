@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef } from "react";
-import { p8_gfx_dat, p8state, P8_BUTTON_MAPPING, P8_DPAD_LEFT, P8_DPAD_RIGHT, P8_NO_ACTION, P8_DPAD_UP, P8_DPAD_DOWN } from "../libraries/PicoStatic";
+import { p8_gfx_dat, p8state, P8_BUTTON_MAPPING, P8_DPAD_LEFT, P8_DPAD_RIGHT, P8_NO_ACTION, P8_DPAD_UP, P8_DPAD_DOWN, Button } from "../libraries/PicoStatic";
 import "../scss/Pico.scss";
 
 interface CustomWindow extends Window {
@@ -600,7 +600,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     }
 
     function p8_convert_standard_gamepad_to_button_state(
-      gamepad: any,
+      gamepad: Gamepad,
       axis_threshold: number,
       button_threshold: number
     ) {
@@ -620,15 +620,15 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       }
       function button_state_from_axis(
         axis: number,
-        low_state: {action: string, code: number},
-        high_state: {action: string, code: number},
-        default_state: {action: string}
-      ) {
+        low_state: Button,
+        high_state: Button,
+        default_state: Button
+      ): Button {
         if (axis && axis < -axis_threshold) return low_state;
         if (axis && axis > axis_threshold) return high_state;
         return default_state;
       }
-      const axes_actions = [
+      const axes_actions: Button[] = [
         button_state_from_axis(
           gamepad.axes[0],
           P8_DPAD_LEFT,
@@ -643,18 +643,18 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         ),
       ];
 
-      var button_actions = gamepad.buttons.map(function (button, index) {
-        var pressed = button.value > button_threshold || button.pressed;
+      const button_actions = gamepad.buttons.map(function (button, index) {
+        const pressed = button.value > button_threshold || button.pressed;
         if (!pressed) return P8_NO_ACTION;
         return P8_BUTTON_MAPPING[index] || P8_NO_ACTION;
       });
 
-      var all_actions = axes_actions.concat(button_actions);
+      const all_actions = axes_actions.concat(button_actions);
 
-      var menu_button = button_actions.some(function (action) {
+      const menu_button = button_actions.some(function (action) {
         return action.action == "menu";
       });
-      var button_state = all_actions
+      const button_state = all_actions
         .filter(function (a) {
           return a.action == "button";
         })
@@ -664,7 +664,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         .reduce(function (result, code) {
           return result | code;
         }, 0);
-      var any_button = gamepad.buttons.some(function (button) {
+      let any_button = gamepad.buttons.some(function (button) {
         return button.value > button_threshold || button.pressed;
       });
 
@@ -733,23 +733,22 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     // gamepad  https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
     // (sets bits in pico8_buttons[])
     function p8_update_gamepads() {
-      var axis_threshold = 0.3;
-      var button_threshold = 0.5; // Should be unnecessary, we should be able to trust .pressed
-      var max_players = 8;
-      var gps = navigator.getGamepads() || navigator.webkitGetGamepads();
+      const axis_threshold = 0.3;
+      const button_threshold = 0.5; // Should be unnecessary, we should be able to trust .pressed
+      const max_players = 8;
+      let gps = navigator.getGamepads() || navigator.webkitGetGamepads();
 
       if (!gps) return;
 
       // In Chrome, gps is iterable but it's not an array.
       gps = Array.from(gps);
 
-      pico8_gamepads.count = gps.length;
-      while (gps.length > pico8_gamepads_mapping.length) {
-        pico8_gamepads_mapping.push(null);
+      myWindow.pico8_gamepads.count = gps.length;
+      while (gps.length > myWindow.pico8_gamepads_mapping.length) {
+        myWindow.pico8_gamepads_mapping.push(null);
       }
 
-      var menu_button = false;
-      var gamepad_states = gps.map(function (gp) {
+      const gamepad_states = gps.map(function (gp: Gamepad | null) {
         return gp && gp.mapping == "standard"
           ? p8_convert_standard_gamepad_to_button_state(
               gp,
