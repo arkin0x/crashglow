@@ -1,11 +1,11 @@
-const P8_BUTTON_O = {action:'button', code: 0x10};
-const P8_BUTTON_X = {action:'button', code: 0x20};
-const P8_DPAD_LEFT = {action:'button', code: 0x1};
-const P8_DPAD_RIGHT = {action:'button', code: 0x2};
-const P8_DPAD_UP = {action:'button', code: 0x4};
-const P8_DPAD_DOWN = {action:'button', code: 0x8};
-const P8_MENU = {action:'menu'};
-const P8_NO_ACTION = {action:'none'};
+export const P8_BUTTON_O = {action:'button', code: 0x10};
+export const P8_BUTTON_X = {action:'button', code: 0x20};
+export const P8_DPAD_LEFT = {action:'button', code: 0x1};
+export const P8_DPAD_RIGHT = {action:'button', code: 0x2};
+export const P8_DPAD_UP = {action:'button', code: 0x4};
+export const P8_DPAD_DOWN = {action:'button', code: 0x8};
+export const P8_MENU = {action:'menu'};
+export const P8_NO_ACTION = {action:'none'};
 
 export const P8_BUTTON_MAPPING = [
   // ref: https://w3c.github.io/gamepad/#remapping

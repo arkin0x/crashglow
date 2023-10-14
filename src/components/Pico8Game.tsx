@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef } from "react";
-import { p8_gfx_dat, p8gfx, p8state P8_BUTTON_MAPPING } from "../libraries/PicoStatic";
+import { p8_gfx_dat, p8state, P8_BUTTON_MAPPING, P8_DPAD_LEFT, P8_DPAD_RIGHT, P8_NO_ACTION, P8_DPAD_UP, P8_DPAD_DOWN } from "../libraries/PicoStatic";
 import "../scss/Pico.scss";
 
 interface CustomWindow extends Window {
@@ -24,7 +25,7 @@ interface CustomWindow extends Window {
   pico8_touch_detected: boolean;
 }
 
-export const Pico8Game = ({ gameJS: string }) => {
+export const Pico8Game = ({gameJS}: {gameJS: string}) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -92,7 +93,7 @@ export const Pico8Game = ({ gameJS: string }) => {
       myWindow.p8_buttons_hash = hash;
       // console.log("@@ updating button icons");
 
-      let els = document.getElementsByClassName("p8_menu_button") as HTMLCollection;
+      const els = document.getElementsByClassName("p8_menu_button") as HTMLCollection;
       for (let i = 0; i < els.length; i++) {
         const el = els[i] as HTMLElement;
         let index = el.id as keyof typeof p8_gfx_dat
@@ -150,23 +151,23 @@ export const Pico8Game = ({ gameJS: string }) => {
         myWindow.pico8_mouse[2] = 0;
       }
 
-      for (var i = 0; i < num; i++) {
-        var touch = e.touches[i];
-        var x = touch.clientX;
-        var y = touch.clientY;
-        var w = window.innerWidth;
-        var h = window.innerHeight;
+      for (let i = 0; i < num; i++) {
+        const touch = e.touches[i];
+        const x = touch.clientX;
+        const y = touch.clientY;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
 
-        var r = Math.min(w, h) / 12;
+        let r = Math.min(w, h) / 12;
         if (r > 40) r = 40;
 
         // mouse (0.1.12d)
 
-        let canvas = document.getElementById("canvas");
+        const canvas = document.getElementById("canvas");
         if (myWindow.p8_touch_detected)
           if (typeof myWindow.pico8_mouse !== "undefined")
             if (canvas) {
-              var rect = canvas.getBoundingClientRect();
+              const rect = canvas.getBoundingClientRect();
               if (
                 x >= rect.left &&
                 x < rect.right &&
@@ -231,13 +232,13 @@ export const Pico8Game = ({ gameJS: string }) => {
     }
 
     function p8_update_layout() {
-      var canvas = document.getElementById("canvas");
-      var p8_playarea = document.getElementById("p8_playarea");
-      var p8_container = document.getElementById("p8_container");
-      var p8_frame = document.getElementById("p8_frame")!;
-      var csize = 512;
-      var margin_top = 0;
-      var margin_left = 0;
+      const canvas = document.getElementById("canvas");
+      const p8_playarea = document.getElementById("p8_playarea");
+      const p8_container = document.getElementById("p8_container");
+      const p8_frame = document.getElementById("p8_frame")!;
+      let csize = 512;
+      let margin_top = 0;
+      let margin_left = 0;
 
       // page didn't load yet? first call should be after p8_frame is created so that layout doesn't jump around.
       if (!canvas || !p8_playarea || !p8_container || !p8_frame) {
@@ -250,13 +251,13 @@ export const Pico8Game = ({ gameJS: string }) => {
 
       // assumes frame doesn't have padding
 
-      var is_fullscreen =
+      const is_fullscreen =
         document.fullscreenElement ||
         document.mozFullScreenElement ||
         document.webkitIsFullScreen ||
         document.msFullscreenElement;
-      var frame_width = p8_frame.offsetWidth;
-      var frame_height = p8_frame.offsetHeight;
+      let frame_width = p8_frame.offsetWidth;
+      let frame_height = p8_frame.offsetHeight;
 
       if (is_fullscreen) {
         // same as window
@@ -272,8 +273,8 @@ export const Pico8Game = ({ gameJS: string }) => {
       csize = Math.min(frame_width, frame_height);
 
       // .. but never more than 2/3 of longest side for touch (e.g. leave space for controls on iPad)
-      if (myWindow.p8_touch_detected && p8_is_running) {
-        var longest_side = Math.max(window.innerWidth, window.innerHeight);
+      if (myWindow.p8_touch_detected && myWindow.p8_is_running) {
+        const longest_side = Math.max(window.innerWidth, window.innerHeight);
         csize = Math.min(csize, (longest_side * 2) / 3);
       }
 
@@ -308,7 +309,7 @@ export const Pico8Game = ({ gameJS: string }) => {
 
       // skip if relevant state has not changed
 
-      var update_hash =
+      let update_hash =
         csize +
         margin_top * 1000.3 +
         margin_left * 0.001 +
@@ -378,9 +379,9 @@ export const Pico8Game = ({ gameJS: string }) => {
         // buttons
 
         // same as touch event handling
-        var w = window.innerWidth;
-        var h = window.innerHeight;
-        var r = Math.min(w, h) / 12;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        let r = Math.min(w, h) / 12;
 
         if (r > 40) r = 40;
 
@@ -431,7 +432,7 @@ export const Pico8Game = ({ gameJS: string }) => {
         myWindow.p8_touch_detected = true;
 
         // hide codo_textarea -- clipboard support on mobile is not feasible
-        let el = document.getElementById("codo_textarea");
+        const el = document.getElementById("codo_textarea");
         if (el && el.style.display != "none") {
           el.style.display = "none";
         }
@@ -440,34 +441,34 @@ export const Pico8Game = ({ gameJS: string }) => {
     );
 
     function p8_create_audio_context() {
-      if (pico8_audio_context) {
+      if (myWindow.pico8_audio_context) {
         try {
-          pico8_audio_context.resume();
+          myWindow.pico8_audio_context.resume();
         } catch (err) {
           console.log("** pico8_audio_context.resume() failed");
         }
         return;
       }
 
-      var webAudioAPI =
+      const webAudioAPI =
         window.AudioContext ||
         window.webkitAudioContext ||
         window.mozAudioContext ||
         window.oAudioContext ||
         window.msAudioContext;
       if (webAudioAPI) {
-        pico8_audio_context = new webAudioAPI();
+        myWindow.pico8_audio_context = new webAudioAPI();
 
         // wake up iOS
-        if (pico8_audio_context) {
+        if (myWindow.pico8_audio_context) {
           try {
-            var dummy_source_sfx = pico8_audio_context.createBufferSource();
-            dummy_source_sfx.buffer = pico8_audio_context.createBuffer(
+            const dummy_source_sfx = myWindow.pico8_audio_context.createBufferSource();
+            dummy_source_sfx.buffer = myWindow.pico8_audio_context.createBuffer(
               1,
               1,
               22050
             ); // dummy
-            dummy_source_sfx.connect(pico8_audio_context.destination);
+            dummy_source_sfx.connect(myWindow.pico8_audio_context.destination);
             dummy_source_sfx.start(1, 0.25); // gives InvalidStateError -- why? hasn't been played before
             //dummy_source_sfx.noteOn(0); // deleteme
           } catch (err) {
@@ -483,16 +484,16 @@ export const Pico8Game = ({ gameJS: string }) => {
     }
 
     function p8_run_cart() {
-      if (p8_is_running) return;
-      p8_is_running = true;
+      if (myWindow.p8_is_running) return;
+      myWindow.p8_is_running = true;
 
       // touch: hide everything except p8_frame_0
-      if (p8_touch_detected) {
-        el = document.getElementById("body_0");
-        el2 = document.getElementById("p8_frame_0");
+      if (myWindow.p8_touch_detected) {
+        const el = document.getElementById("body_0");
+        const el2 = document.getElementById("p8_frame_0");
         if (el && el2) {
           el.style.display = "none";
-          el.parentNode.appendChild(el2);
+          el.parentNode!.appendChild(el2);
         }
       }
 
@@ -500,8 +501,12 @@ export const Pico8Game = ({ gameJS: string }) => {
       p8_create_audio_context();
 
       // show touch elements
-      els = document.getElementsByClassName("p8_controller_area");
-      for (i = 0; i < els.length; i++) els[i].style.display = "";
+      const els = document.getElementsByClassName("p8_controller_area") as HTMLCollection
+      for (let i = 0; i < els.length; i++) {
+        if (els[i] && (els[i] as HTMLElement).style){
+          (els[i] as HTMLElement).style.display = "";
+        } 
+      }
 
       // install touch events. These also serve to block scrolling / pinching / zooming on phones when p8_is_running
       // moved event.preventDefault(); calls into pico8_buttons_event() (want to let top buttons pass through)
@@ -528,101 +533,54 @@ export const Pico8Game = ({ gameJS: string }) => {
       );
 
       // load and run script
-      e = document.createElement("script");
-      p8_script = e;
+      // @TODO: modify this for using the gameJS string prop.
+      const e = document.createElement("script");
+      myWindow.p8_script = e;
       e.onload = function () {
         // show canvas / menu buttons only after loading
-        el = document.getElementById("p8_playarea");
+        const el = document.getElementById("p8_playarea");
         if (el) el.style.display = "table";
 
-        if (typeof p8_update_layout_hash !== "undefined")
-          p8_update_layout_hash = -77;
-        if (typeof p8_buttons_hash !== "undefined") p8_buttons_hash = -33;
-      };
+        if (typeof myWindow.p8_update_layout_hash !== "undefined")
+          myWindow.p8_update_layout_hash = -77;
+        if (typeof myWindow.p8_buttons_hash !== "undefined") myWindow.p8_buttons_hash = -33;
+      }
       e.type = "application/javascript";
-      e.src = "defuse.js";
+      e.text = gameJS
       e.id = "e_script";
 
       document.body.appendChild(e); // load and run
 
       // hide start button and show canvas / menu buttons. hide start button
-      el = document.getElementById("p8_start_button");
+      const el = document.getElementById("p8_start_button");
       if (el) el.style.display = "none";
 
       // add #playing for touchscreen devices (allows back button to close)
       // X button can also be used to trigger this
-      if (p8_touch_detected) {
+      if (myWindow.p8_touch_detected) {
         window.location.hash = "#playing";
         window.onhashchange = function () {
           if (window.location.hash.search("playing") < 0)
             window.location.reload();
         };
       }
-
-      // install drag&drop listeners
-      {
-        let canvas = document.getElementById("canvas");
-        if (canvas) {
-          canvas.addEventListener("dragenter", dragover, false);
-          canvas.addEventListener("dragover", dragover, false);
-          canvas.addEventListener("dragleave", dragstop, false);
-          canvas.addEventListener("drop", nop, false);
-          canvas.addEventListener("drop", p8_drop_file, false);
-        }
-      }
     }
 
-    // Gamepad code
-
-    var P8_BUTTON_O = { action: "button", code: 0x10 };
-    var P8_BUTTON_X = { action: "button", code: 0x20 };
-    var P8_DPAD_LEFT = { action: "button", code: 0x1 };
-    var P8_DPAD_RIGHT = { action: "button", code: 0x2 };
-    var P8_DPAD_UP = { action: "button", code: 0x4 };
-    var P8_DPAD_DOWN = { action: "button", code: 0x8 };
-    var P8_MENU = { action: "menu" };
-    var P8_NO_ACTION = { action: "none" };
-
-    var P8_BUTTON_MAPPING = [
-      // ref: https://w3c.github.io/gamepad/#remapping
-      P8_BUTTON_O, // Bottom face button
-      P8_BUTTON_X, // Right face button
-      P8_BUTTON_X, // Left face button
-      P8_BUTTON_O, // Top face button
-      P8_NO_ACTION, // Near left shoulder button (L1)
-      P8_NO_ACTION, // Near right shoulder button (R1)
-      P8_NO_ACTION, // Far left shoulder button (L2)
-      P8_NO_ACTION, // Far right shoulder button (R2)
-      P8_MENU, // Left auxiliary button (select)
-      P8_MENU, // Right auxiliary button (start)
-      P8_NO_ACTION, // Left stick button
-      P8_NO_ACTION, // Right stick button
-      P8_DPAD_UP, // Dpad up
-      P8_DPAD_DOWN, // Dpad down
-      P8_DPAD_LEFT, // Dpad left
-      P8_DPAD_RIGHT, // Dpad right
-    ];
-
-    // Track which player is controller by each gamepad. Gamepad index i controls the
-    // player with index pico8_gamepads_mapping[i]. Gamepads with null player are
-    // currently unassigned - they get assigned to a player when a button is pressed.
-    var pico8_gamepads_mapping = [];
-
-    function p8_unassign_gamepad(gamepad_index) {
-      if (pico8_gamepads_mapping[gamepad_index] == null) {
+    function p8_unassign_gamepad(gamepad_index: number) {
+      if (myWindow.pico8_gamepads_mapping[gamepad_index] == null) {
         return;
       }
-      pico8_buttons[pico8_gamepads_mapping[gamepad_index]] = 0;
-      pico8_gamepads_mapping[gamepad_index] = null;
+      myWindow.pico8_buttons[myWindow.pico8_gamepads_mapping[gamepad_index]] = 0;
+      myWindow.pico8_gamepads_mapping[gamepad_index] = null;
     }
 
-    function p8_first_player_without_gamepad(max_players) {
-      var allocated_players = pico8_gamepads_mapping.filter(function (x) {
+    function p8_first_player_without_gamepad(max_players: number) {
+      const allocated_players = myWindow.pico8_gamepads_mapping.filter(function (x) {
         return x != null;
       });
-      var sorted_players = Array.from(allocated_players).sort();
+      const sorted_players = Array.from(allocated_players).sort();
       for (
-        var desired = 0;
+        let desired = 0;
         desired < sorted_players.length && desired < max_players;
         ++desired
       ) {
@@ -636,15 +594,15 @@ export const Pico8Game = ({ gameJS: string }) => {
       return null;
     }
 
-    function p8_assign_gamepad_to_player(gamepad_index, player_index) {
+    function p8_assign_gamepad_to_player(gamepad_index: number, player_index: number) {
       p8_unassign_gamepad(gamepad_index);
-      pico8_gamepads_mapping[gamepad_index] = player_index;
+      myWindow.pico8_gamepads_mapping[gamepad_index] = player_index;
     }
 
     function p8_convert_standard_gamepad_to_button_state(
-      gamepad,
-      axis_threshold,
-      button_threshold
+      gamepad: any,
+      axis_threshold: number,
+      button_threshold: number
     ) {
       // Given a gamepad object, return:
       // {
@@ -661,16 +619,16 @@ export const Pico8Game = ({ gameJS: string }) => {
         };
       }
       function button_state_from_axis(
-        axis,
-        low_state,
-        high_state,
-        default_state
+        axis: number,
+        low_state: {action: string, code: number},
+        high_state: {action: string, code: number},
+        default_state: {action: string}
       ) {
         if (axis && axis < -axis_threshold) return low_state;
         if (axis && axis > axis_threshold) return high_state;
         return default_state;
       }
-      var axes_actions = [
+      const axes_actions = [
         button_state_from_axis(
           gamepad.axes[0],
           P8_DPAD_LEFT,
@@ -923,4 +881,4 @@ export const Pico8Game = ({ gameJS: string }) => {
   );
 };
 
-export default TestCart;
+export default Pico8Game;
