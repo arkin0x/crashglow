@@ -659,21 +659,23 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
           return a.action == "button";
         })
         .map(function (a) {
-          return a.code;
+          return a.code!;
         })
         .reduce(function (result, code) {
           return result | code;
         }, 0);
-      let any_button = gamepad.buttons.some(function (button) {
+
+      const any_button = gamepad.buttons.some(function (button) {
         return button.value > button_threshold || button.pressed;
       });
 
-      any_button |= button_state; //jww: include axes 0,1 as might be first intended action
+      let any_button_bin = any_button ? 1 : 0
+      any_button_bin |= button_state; //jww: include axes 0,1 as might be first intended action
 
       return {
         button_state,
         menu_button,
-        any_button,
+        any_button_bin,
       };
     }
 
