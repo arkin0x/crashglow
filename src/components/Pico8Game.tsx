@@ -684,9 +684,9 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     // menu buttons are unpredictable, but use 6..8 anyway (better to have a weird menu button than none)
 
     function p8_convert_unmapped_gamepad_to_button_state(
-      gamepad,
-      axis_threshold,
-      button_threshold
+      gamepad: Gamepad | null,
+      axis_threshold: number,
+      button_threshold: number
     ) {
       if (!gamepad || !gamepad.axes || !gamepad.buttons) {
         return {
@@ -696,7 +696,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         };
       }
 
-      var button_state = 0;
+      let button_state = 0;
 
       if (gamepad.axes[0] && gamepad.axes[0] < -axis_threshold)
         button_state |= 0x1;
@@ -709,7 +709,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
       // buttons: first 4 taken to be O/X, 6..8 taken to be menu button
 
-      for (j = 0; j < gamepad.buttons.length; j++)
+      for (let j = 0; j < gamepad.buttons.length; j++)
         if (gamepad.buttons[j].value > 0 || gamepad.buttons[j].pressed) {
           if (j < 4)
             button_state |=
@@ -717,18 +717,20 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
           else if (j >= 6 && j <= 8) button_state |= 0x40;
         }
 
-      var menu_button = button_state & 0x40;
+      const menu_button = button_state & 0x40;
 
-      var any_button = gamepad.buttons.some(function (button) {
+      const any_button = gamepad.buttons.some(function (button) {
         return button.value > button_threshold || button.pressed;
       });
 
-      any_button |= button_state; //jww: include axes 0,1 as might be first intended action
+      let any_button_bin = any_button ? 1 : 0
+
+      any_button_bin |= button_state; //jww: include axes 0,1 as might be first intended action
 
       return {
         button_state,
         menu_button,
-        any_button,
+        any_button_bin,
       };
     }
 
@@ -761,7 +763,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
               gp,
               axis_threshold,
               button_threshold
-            );
+            )
       });
 
       // Unassign disconnected gamepads.
@@ -774,16 +776,17 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
       // Assign unassigned gamepads when any button is pressed.
       gamepad_states.forEach(function (state, i) {
-        if (state.any_button && pico8_gamepads_mapping[i] == null) {
-          var first_free_player = p8_first_player_without_gamepad(max_players);
-          p8_assign_gamepad_to_player(i, first_free_player);
+        if (state.any_button && myWindow.pico8_gamepads_mapping[i] == null) {
+          const first_free_player = p8_first_player_without_gamepad(max_players);
+          if (first_free_player != null)
+            p8_assign_gamepad_to_player(i, first_free_player);
         }
       });
 
       // Update pico8_buttons array.
       gamepad_states.forEach(function (gamepad_state, i) {
-        if (pico8_gamepads_mapping[i] != null) {
-          pico8_buttons[pico8_gamepads_mapping[i]] = gamepad_state.button_state;
+        if (myWindow.pico8_gamepads_mapping[i] != null) {
+          myWindow.pico8_buttons[myWindow.pico8_gamepads_mapping[i]] = gamepad_state.button_state;
         }
       });
 
@@ -795,7 +798,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
           return state.menu_button;
         })
       ) {
-        pico8_buttons[0] |= 0x40;
+        myWindow.pico8_buttons[0] |= 0x40;
       }
 
       requestAnimationFrame(p8_update_gamepads);
@@ -809,9 +812,9 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       "keydown",
       function (event) {
         event = event || window.event;
-        if (!p8_is_running) return;
+        if (!myWindow.p8_is_running) return;
 
-        if (pico8_state.has_focus == 1)
+        if (myWindow.pico8_state.has_focus == 1)
           if ([32, 37, 38, 39, 40, 77, 82, 80, 9].indexOf(event.keyCode) > -1)
             if (event.preventDefault)
               // block only cursors, M R P, tab
@@ -822,10 +825,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // when using codo_textarea to determine focus, need to explicitly hand focus back when clicking a p8_menu_button
     function p8_give_focus() {
-      el =
-        typeof codo_textarea === "undefined"
-          ? document.getElementById("codo_textarea")
-          : codo_textarea;
+      const el = document.getElementById("codo_textarea") as HTMLTextAreaElement
       if (el) {
         el.focus();
         el.select();
@@ -862,7 +862,11 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         el.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
       }
     }
-  }, []);
+
+    return () => {
+      // probably just refresh the page... but when?
+    }
+  }, [gameJS]);
 
   return (
     <div className="body_0">
