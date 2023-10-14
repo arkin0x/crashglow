@@ -86,6 +86,8 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       { passive: false }
     );
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     function p8_update_button_icons() {
       // buttons only appear when running
       if (!myWindow.p8_is_running) {
@@ -250,6 +252,8 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     function p8_update_layout() {
       const canvas = document.getElementById("canvas");
       const p8_playarea = document.getElementById("p8_playarea");
@@ -497,11 +501,15 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     function p8_close_cart() {
       // just reload page! used for touch buttons -- hard to roll back state
       window.location.hash = ""; // triggers reload
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     function p8_run_cart() {
       if (myWindow.p8_is_running) return;
       myWindow.p8_is_running = true;
@@ -843,6 +851,8 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     );
 
     // when using codo_textarea to determine focus, need to explicitly hand focus back when clicking a p8_menu_button
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     function p8_give_focus() {
       const el = document.getElementById("codo_textarea") as HTMLTextAreaElement
       if (el) {
@@ -851,6 +861,8 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     function p8_request_fullscreen() {
       const is_fullscreen =
         document.fullscreenElement ||
