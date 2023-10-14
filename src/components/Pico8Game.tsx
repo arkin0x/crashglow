@@ -23,6 +23,23 @@ interface CustomWindow extends Window {
   pico8_mouse: any[];
   pico8_state: p8state;
   pico8_touch_detected: boolean;
+  webkitAudioContext?: AudioContext;
+  mozAudioContext?: AudioContext;
+  oAudioContext?: AudioContext;
+  msAudioContext?: AudioContext;
+}
+
+interface CustomDocument extends Document {
+  mozFullScreenElement?: Element | null;
+  webkitIsFullScreen?: boolean;
+  msFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => void;
+  mozCancelFullScreen?: () => void;
+  msExitFullscreen?: () => void;
+}
+
+interface CustomNavigator extends Navigator {
+  webkitGetGamepads: () => Gamepad[];
 }
 
 export const Pico8Game = ({gameJS}: {gameJS: string}) => {
@@ -31,6 +48,8 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
   useEffect(() => {
     // global vars
     const myWindow = window as unknown as CustomWindow;
+    const document = window.document as CustomDocument;
+    const navigator = window.navigator as CustomNavigator;
     myWindow.last_windowed_container_height = 512;
     myWindow.Module = null;
     myWindow.p8_allow_mobile_menu = true;
@@ -452,10 +471,10 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
       const webAudioAPI =
         window.AudioContext ||
-        window.webkitAudioContext ||
-        window.mozAudioContext ||
-        window.oAudioContext ||
-        window.msAudioContext;
+        myWindow.webkitAudioContext ||
+        myWindow.mozAudioContext ||
+        myWindow.oAudioContext ||
+        myWindow.msAudioContext;
       if (webAudioAPI) {
         myWindow.pico8_audio_context = new webAudioAPI();
 
@@ -833,7 +852,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     }
 
     function p8_request_fullscreen() {
-      var is_fullscreen =
+      const is_fullscreen =
         document.fullscreenElement ||
         document.mozFullScreenElement ||
         document.webkitIsFullScreen ||
@@ -852,14 +871,14 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         return;
       }
 
-      var el = document.getElementById("p8_playarea");
+      const el = document.getElementById("p8_playarea")! as HTMLElement
 
       if (el.requestFullscreen) {
         el.requestFullscreen();
-      } else if (el.mozRequestFullScreen) {
-        el.mozRequestFullScreen();
-      } else if (el.webkitRequestFullScreen) {
-        el.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+      } else if ((el as any).mozRequestFullScreen) {
+        (el as any).mozRequestFullScreen();
+      } else if ((el as any).webkitRequestFullScreen) {
+        (el as any).webkitRequestFullScreen((Element as any).ALLOW_KEYBOARD_INPUT);
       }
     }
 
