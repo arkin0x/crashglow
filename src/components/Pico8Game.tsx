@@ -1,0 +1,926 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect, useRef } from "react";
+import { p8_gfx_dat, p8gfx, p8state P8_BUTTON_MAPPING } from "../libraries/PicoStatic";
+import "../scss/Pico.scss";
+
+interface CustomWindow extends Window {
+  last_windowed_container_height: number;
+  Module: any;
+  p8_allow_mobile_menu: boolean;
+  p8_autoplay: boolean;
+  p8_buttons_hash: number;
+  p8_is_running: boolean;
+  p8_layout_frames: number;
+  p8_script: any;
+  p8_touch_detected: boolean;
+  p8_update_layout_hash: number;
+  pico8_audio_context: any;
+  pico8_buttons: number[];
+  pico8_gamepads_mapping: any[];
+  pico8_gamepads: any;
+  pico8_gpio: any[];
+  pico8_mouse: any[];
+  pico8_state: p8state;
+  pico8_touch_detected: boolean;
+}
+
+export const Pico8Game = ({ gameJS: string }) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    // global vars
+    const myWindow = window as unknown as CustomWindow;
+    myWindow.last_windowed_container_height = 512;
+    myWindow.Module = null;
+    myWindow.p8_allow_mobile_menu = true;
+    myWindow.p8_autoplay = false;
+    myWindow.p8_buttons_hash = -1;
+    myWindow.p8_is_running = false;
+    myWindow.p8_layout_frames = 0;
+    myWindow.p8_script = null;
+    myWindow.p8_touch_detected = false;
+    myWindow.p8_update_layout_hash = -1;
+    myWindow.pico8_audio_context;
+    myWindow.pico8_buttons = [0, 0, 0, 0, 0, 0, 0, 0]; // max 8 players
+    myWindow.pico8_gamepads = {};
+    myWindow.pico8_gamepads_mapping = [];
+    myWindow.pico8_gamepads.count = 0;
+    myWindow.pico8_gpio = new Array(128);
+    myWindow.pico8_mouse = [];
+    myWindow.pico8_state = [] as p8state
+    myWindow.p8_touch_detected = false;
+
+    document.addEventListener("touchstart", () => {});
+    document.addEventListener("touchmove", () => {});
+    document.addEventListener("touchend", () => {});
+    document.addEventListener(
+      "keydown",
+      function (event) {
+        if (!myWindow.p8_is_running) return;
+        if (myWindow.pico8_state.has_focus == 1)
+          if ([32, 37, 38, 39, 40, 77, 82, 80, 9].indexOf(event.keyCode) > -1)
+            if (event.preventDefault)
+              // block only cursors, M R P, tab
+              event.preventDefault();
+      },
+      { passive: false }
+    );
+
+    function p8_update_button_icons() {
+      // buttons only appear when running
+      if (!myWindow.p8_is_running) {
+        requestAnimationFrame(p8_update_button_icons);
+        return;
+      }
+      const is_fullscreen =
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitIsFullScreen ||
+        document.msFullscreenElement;
+
+      // hash based on: pico8_state.sound_volume  pico8_state.is_paused bottom_margin left is_fullscreen p8_touch_detected
+      let hash = myWindow.pico8_state.sound_volume || 0;
+      if (myWindow.pico8_state.is_paused) hash += 0x100;
+      if (myWindow.p8_touch_detected) hash += 0x200;
+      if (is_fullscreen) hash += 0x400;
+
+      if (myWindow.p8_buttons_hash == hash) {
+        requestAnimationFrame(p8_update_button_icons);
+        return;
+      }
+
+      myWindow.p8_buttons_hash = hash;
+      // console.log("@@ updating button icons");
+
+      let els = document.getElementsByClassName("p8_menu_button") as HTMLCollection;
+      for (let i = 0; i < els.length; i++) {
+        const el = els[i] as HTMLElement;
+        let index = el.id as keyof typeof p8_gfx_dat
+        if (index == "p8b_sound" as keyof typeof p8_gfx_dat)
+          index += myWindow.pico8_state.sound_volume == 0 ? "0" : "1"; // 1 if undefined
+        if (index == "p8b_pause" as keyof typeof p8_gfx_dat)
+          index += myWindow.pico8_state.is_paused! > 0 ? "1" : "0"; // 0 if undefined
+
+        const new_str =
+          '<img width=24 height=24 style="pointer-events:none" src="' +
+          p8_gfx_dat[index as keyof typeof p8_gfx_dat] +
+          '">';
+        if (el.innerHTML != new_str) el.innerHTML = new_str;
+
+        // hide all buttons for touch mode (can pause with menu buttons)
+
+        let is_visible = myWindow.p8_is_running as boolean;
+
+        if (
+          (!myWindow.p8_touch_detected || !myWindow.p8_allow_mobile_menu) &&
+          el.parentElement!.id == "p8_menu_buttons_touch"
+        )
+          is_visible = false;
+
+        if (myWindow.p8_touch_detected && el.parentElement!.id == "p8_menu_buttons")
+          is_visible = false;
+
+        if (is_fullscreen) is_visible = false;
+
+        if (is_visible) el.style.display = "";
+        else el.style.display = "none";
+      }
+      requestAnimationFrame(p8_update_button_icons);
+    }
+
+    function abs(x: number) {
+      return x < 0 ? -x : x;
+    }
+
+    // step 0 down 1 drag 2 up (not used)
+    function pico8_buttons_event(e: TouchEvent, step: number) {
+      if (!myWindow.p8_is_running) return;
+
+      myWindow.pico8_buttons[0] = 0;
+
+      if (step == 2 && typeof myWindow.pico8_mouse !== "undefined") {
+        myWindow.pico8_mouse[2] = 0;
+      }
+
+      let num = 0;
+      if (e.touches) num = e.touches.length;
+
+      if (num == 0 && typeof myWindow.pico8_mouse !== "undefined") {
+        //  no active touches: release mouse button from anywhere on page. (maybe redundant? but just in case)
+        myWindow.pico8_mouse[2] = 0;
+      }
+
+      for (var i = 0; i < num; i++) {
+        var touch = e.touches[i];
+        var x = touch.clientX;
+        var y = touch.clientY;
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+
+        var r = Math.min(w, h) / 12;
+        if (r > 40) r = 40;
+
+        // mouse (0.1.12d)
+
+        let canvas = document.getElementById("canvas");
+        if (myWindow.p8_touch_detected)
+          if (typeof myWindow.pico8_mouse !== "undefined")
+            if (canvas) {
+              var rect = canvas.getBoundingClientRect();
+              if (
+                x >= rect.left &&
+                x < rect.right &&
+                y >= rect.top &&
+                y < rect.bottom
+              ) {
+                myWindow.pico8_mouse = [
+                  Math.floor(
+                    ((x - rect.left) * 128) / (rect.right - rect.left)
+                  ),
+                  Math.floor(((y - rect.top) * 128) / (rect.bottom - rect.top)),
+                  step < 2 ? 1 : 0,
+                ];
+              } else {
+                myWindow.pico8_mouse[2] = 0;
+              }
+            }
+
+        // buttons
+
+        let b = 0;
+
+        if (y < h - r * 8) {
+          // no controller buttons up here; includes canvas and menu buttons at top in touch mode
+        } else {
+          e.preventDefault();
+
+          if (y < h - r * 6 && y > h - r * 8) {
+            // menu button: half as high as X O button
+            // stretch across right-hand half above X O buttons
+            if (x > w - r * 3) b |= 0x40;
+          } else if (x < w / 2 && x < r * 6) {
+            // stick
+
+            const cx = 0 + r * 3;
+            const cy = h - r * 3;
+
+            const deadzone = r / 3;
+            const dx = x - cx;
+            const dy = y - cy;
+
+            if (abs(dx) > abs(dy) * 0.6) {
+              // horizontal
+              if (dx < -deadzone) b |= 0x1;
+              if (dx > deadzone) b |= 0x2;
+            }
+            if (abs(dy) > abs(dx) * 0.6) {
+              // vertical
+              if (dy < -deadzone) b |= 0x4;
+              if (dy > deadzone) b |= 0x8;
+            }
+          } else if (x > w - r * 6) {
+            // button; diagonal split from bottom right corner
+            // one or both of [X], [O]
+            if (h - y > (w - x) * 0.8) b |= 0x10;
+            if (w - x > (h - y) * 0.8) b |= 0x20;
+          }
+        }
+
+        myWindow.pico8_buttons[0] |= b;
+      }
+    }
+
+    function p8_update_layout() {
+      var canvas = document.getElementById("canvas");
+      var p8_playarea = document.getElementById("p8_playarea");
+      var p8_container = document.getElementById("p8_container");
+      var p8_frame = document.getElementById("p8_frame")!;
+      var csize = 512;
+      var margin_top = 0;
+      var margin_left = 0;
+
+      // page didn't load yet? first call should be after p8_frame is created so that layout doesn't jump around.
+      if (!canvas || !p8_playarea || !p8_container || !p8_frame) {
+        myWindow.p8_update_layout_hash = -1;
+        requestAnimationFrame(p8_update_layout);
+        return;
+      }
+
+      myWindow.p8_layout_frames++;
+
+      // assumes frame doesn't have padding
+
+      var is_fullscreen =
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitIsFullScreen ||
+        document.msFullscreenElement;
+      var frame_width = p8_frame.offsetWidth;
+      var frame_height = p8_frame.offsetHeight;
+
+      if (is_fullscreen) {
+        // same as window
+        frame_width = window.innerWidth;
+        frame_height = window.innerHeight;
+      } else {
+        // never larger than window  // (happens when address bar is down in portraight mode on phone)
+        frame_width = Math.min(frame_width, window.innerWidth);
+        frame_height = Math.min(frame_height, window.innerHeight);
+      }
+
+      // as big as will fit in a frame..
+      csize = Math.min(frame_width, frame_height);
+
+      // .. but never more than 2/3 of longest side for touch (e.g. leave space for controls on iPad)
+      if (myWindow.p8_touch_detected && p8_is_running) {
+        var longest_side = Math.max(window.innerWidth, window.innerHeight);
+        csize = Math.min(csize, (longest_side * 2) / 3);
+      }
+
+      // pixel perfect: quantize to closest multiple of 128
+      // only when large display (desktop)
+      if (frame_width >= 512 && frame_height >= 512) {
+        csize = (csize + 1) & ~0x7f;
+      }
+
+      // csize should never be higher than parent frame
+      // (otherwise stretched large when fullscreen and then return)
+      if (!is_fullscreen && p8_frame)
+        csize = Math.min(csize, myWindow.last_windowed_container_height); // p8_frame_0 parent
+
+      if (is_fullscreen) {
+        // always center horizontally
+        margin_left = (frame_width - csize) / 2;
+
+        if (myWindow.p8_touch_detected) {
+          if (window.innerWidth < window.innerHeight) {
+            // portrait: keep at y=40 (avoid rounded top corners / camera nub thing etc.)
+            margin_top = Math.min(40, frame_height - csize);
+          } else {
+            // landscape: put a little above vertical center
+            margin_top = (frame_height - csize) / 4;
+          }
+        } else {
+          // non-touch: center vertically
+          margin_top = (frame_height - csize) / 2;
+        }
+      }
+
+      // skip if relevant state has not changed
+
+      var update_hash =
+        csize +
+        margin_top * 1000.3 +
+        margin_left * 0.001 +
+        frame_width * 333.33 +
+        frame_height * 772.15134;
+      if (is_fullscreen) update_hash += 0.1237;
+
+      // unexpected things can happen in the first few seconds, so just keep re-calculating layout. wasm version breaks layout otherwise.
+      // also: bonus refresh at 5, 8 seconds just in case ._.
+      if (
+        myWindow.p8_layout_frames < 180 ||
+        myWindow.p8_layout_frames == 60 * 5 ||
+        myWindow.p8_layout_frames == 60 * 8
+      )
+        update_hash = myWindow.p8_layout_frames;
+
+      if (!is_fullscreen)
+        if (!myWindow.p8_touch_detected)
+          // fullscreen: update every frame for safety. should be cheap!
+          if (myWindow.p8_update_layout_hash == update_hash) {
+            // mobile: update every frame because nothing can be trusted
+            //console.log("p8_update_layout(): skipping");
+            requestAnimationFrame(p8_update_layout);
+            return;
+          }
+      myWindow.p8_update_layout_hash = update_hash;
+
+      // record this for returning to original size after fullscreen pushes out container height (argh)
+      if (!is_fullscreen && p8_frame)
+        myWindow.last_windowed_container_height =
+          (p8_frame.parentNode!.parentNode! as HTMLDivElement).offsetHeight;
+
+      // mobile in portrait mode: put screen at top (w / a little extra space for fullscreen button if needed)
+      // (don't cart too about buttons overlapping screen)
+      if (
+        myWindow.p8_touch_detected &&
+        myWindow.p8_is_running &&
+        document.body.clientWidth < document.body.clientHeight
+      )
+        p8_playarea.style.marginTop = myWindow.p8_allow_mobile_menu ? "32" : "8"
+      else if (myWindow.p8_touch_detected && myWindow.p8_is_running)
+        // landscape: slightly above vertical center (only relevant for iPad / highres devices)
+        p8_playarea.style.marginTop = ((document.body.clientHeight - csize) / 4).toString()
+      else p8_playarea.style.marginTop = "";
+
+      canvas.style.width = csize.toString();
+      canvas.style.height = csize.toString();
+
+      // to do: this should just happen from css layout
+      canvas.style.marginLeft = margin_left.toString();
+      canvas.style.marginTop = margin_top.toString();
+
+      p8_container.style.width = csize.toString();
+      p8_container.style.height = csize.toString();
+
+      // set menu buttons position to bottom right
+      let el = document.getElementById("p8_menu_buttons") as HTMLElement;
+      el.style.marginTop = (csize - el.offsetHeight).toString();
+
+      if (myWindow.p8_touch_detected && myWindow.p8_is_running) {
+        // turn off pointer events to prevent double-tap zoom etc (works on Android)
+        // don't want this for desktop because breaks mouse input & click-to-focus when using codo_textarea
+        canvas.style.pointerEvents = "none";
+
+        p8_container.style.marginTop = "0px";
+
+        // buttons
+
+        // same as touch event handling
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var r = Math.min(w, h) / 12;
+
+        if (r > 40) r = 40;
+
+        el = document.getElementById("controls_right_panel") as HTMLElement;
+        el.style.left = (w - r * 6).toString();
+        el.style.top = (h - r * 7).toString();
+        el.style.width = (r * 6).toString();
+        el.style.height = (r * 7).toString();
+        if (el.getAttribute("src") != p8_gfx_dat["controls_right_panel"])
+          // optimisation: avoid reload? (browser should handle though)
+          el.setAttribute("src", p8_gfx_dat["controls_right_panel"]);
+
+        el = document.getElementById("controls_left_panel") as HTMLElement;
+        el.style.left = (0).toString()
+        el.style.top = (h - r * 6).toString()
+        el.style.width = (r * 6).toString()
+        el.style.height = (r * 6).toString()
+        if (el.getAttribute("src") != p8_gfx_dat["controls_left_panel"])
+          // optimisation: avoid reload? (browser should handle though)
+          el.setAttribute("src", p8_gfx_dat["controls_left_panel"]);
+
+        // scroll to cart (commented; was a failed attempt to prevent scroll-on-drag on some browsers)
+        // p8_frame.scrollIntoView(true);
+
+        document.getElementById("touch_controls_gfx")!.style.display = "table";
+        document.getElementById("touch_controls_background")!.style.display =
+          "table";
+      } else {
+        document.getElementById("touch_controls_gfx")!.style.display = "none";
+        document.getElementById("touch_controls_background")!.style.display =
+          "none";
+      }
+
+      if (!myWindow.p8_is_running) {
+        p8_playarea.style.display = "none";
+        p8_container.style.display = "flex";
+        p8_container.style.marginTop = "auto";
+
+        el = document.getElementById("p8_start_button") as HTMLElement;
+        if (el) el.style.display = "flex";
+      }
+      requestAnimationFrame(p8_update_layout);
+    }
+
+    addEventListener(
+      "touchstart",
+      function () {
+        myWindow.p8_touch_detected = true;
+
+        // hide codo_textarea -- clipboard support on mobile is not feasible
+        let el = document.getElementById("codo_textarea");
+        if (el && el.style.display != "none") {
+          el.style.display = "none";
+        }
+      },
+      { passive: true }
+    );
+
+    function p8_create_audio_context() {
+      if (pico8_audio_context) {
+        try {
+          pico8_audio_context.resume();
+        } catch (err) {
+          console.log("** pico8_audio_context.resume() failed");
+        }
+        return;
+      }
+
+      var webAudioAPI =
+        window.AudioContext ||
+        window.webkitAudioContext ||
+        window.mozAudioContext ||
+        window.oAudioContext ||
+        window.msAudioContext;
+      if (webAudioAPI) {
+        pico8_audio_context = new webAudioAPI();
+
+        // wake up iOS
+        if (pico8_audio_context) {
+          try {
+            var dummy_source_sfx = pico8_audio_context.createBufferSource();
+            dummy_source_sfx.buffer = pico8_audio_context.createBuffer(
+              1,
+              1,
+              22050
+            ); // dummy
+            dummy_source_sfx.connect(pico8_audio_context.destination);
+            dummy_source_sfx.start(1, 0.25); // gives InvalidStateError -- why? hasn't been played before
+            //dummy_source_sfx.noteOn(0); // deleteme
+          } catch (err) {
+            console.log("** dummy_source_sfx.start(1, 0.25) failed");
+          }
+        }
+      }
+    }
+
+    function p8_close_cart() {
+      // just reload page! used for touch buttons -- hard to roll back state
+      window.location.hash = ""; // triggers reload
+    }
+
+    function p8_run_cart() {
+      if (p8_is_running) return;
+      p8_is_running = true;
+
+      // touch: hide everything except p8_frame_0
+      if (p8_touch_detected) {
+        el = document.getElementById("body_0");
+        el2 = document.getElementById("p8_frame_0");
+        if (el && el2) {
+          el.style.display = "none";
+          el.parentNode.appendChild(el2);
+        }
+      }
+
+      // create audio context and wake it up (for iOS -- needs happen inside touch event)
+      p8_create_audio_context();
+
+      // show touch elements
+      els = document.getElementsByClassName("p8_controller_area");
+      for (i = 0; i < els.length; i++) els[i].style.display = "";
+
+      // install touch events. These also serve to block scrolling / pinching / zooming on phones when p8_is_running
+      // moved event.preventDefault(); calls into pico8_buttons_event() (want to let top buttons pass through)
+      addEventListener(
+        "touchstart",
+        function (event) {
+          pico8_buttons_event(event, 0);
+        },
+        { passive: false }
+      );
+      addEventListener(
+        "touchmove",
+        function (event) {
+          pico8_buttons_event(event, 1);
+        },
+        { passive: false }
+      );
+      addEventListener(
+        "touchend",
+        function (event) {
+          pico8_buttons_event(event, 2);
+        },
+        { passive: false }
+      );
+
+      // load and run script
+      e = document.createElement("script");
+      p8_script = e;
+      e.onload = function () {
+        // show canvas / menu buttons only after loading
+        el = document.getElementById("p8_playarea");
+        if (el) el.style.display = "table";
+
+        if (typeof p8_update_layout_hash !== "undefined")
+          p8_update_layout_hash = -77;
+        if (typeof p8_buttons_hash !== "undefined") p8_buttons_hash = -33;
+      };
+      e.type = "application/javascript";
+      e.src = "defuse.js";
+      e.id = "e_script";
+
+      document.body.appendChild(e); // load and run
+
+      // hide start button and show canvas / menu buttons. hide start button
+      el = document.getElementById("p8_start_button");
+      if (el) el.style.display = "none";
+
+      // add #playing for touchscreen devices (allows back button to close)
+      // X button can also be used to trigger this
+      if (p8_touch_detected) {
+        window.location.hash = "#playing";
+        window.onhashchange = function () {
+          if (window.location.hash.search("playing") < 0)
+            window.location.reload();
+        };
+      }
+
+      // install drag&drop listeners
+      {
+        let canvas = document.getElementById("canvas");
+        if (canvas) {
+          canvas.addEventListener("dragenter", dragover, false);
+          canvas.addEventListener("dragover", dragover, false);
+          canvas.addEventListener("dragleave", dragstop, false);
+          canvas.addEventListener("drop", nop, false);
+          canvas.addEventListener("drop", p8_drop_file, false);
+        }
+      }
+    }
+
+    // Gamepad code
+
+    var P8_BUTTON_O = { action: "button", code: 0x10 };
+    var P8_BUTTON_X = { action: "button", code: 0x20 };
+    var P8_DPAD_LEFT = { action: "button", code: 0x1 };
+    var P8_DPAD_RIGHT = { action: "button", code: 0x2 };
+    var P8_DPAD_UP = { action: "button", code: 0x4 };
+    var P8_DPAD_DOWN = { action: "button", code: 0x8 };
+    var P8_MENU = { action: "menu" };
+    var P8_NO_ACTION = { action: "none" };
+
+    var P8_BUTTON_MAPPING = [
+      // ref: https://w3c.github.io/gamepad/#remapping
+      P8_BUTTON_O, // Bottom face button
+      P8_BUTTON_X, // Right face button
+      P8_BUTTON_X, // Left face button
+      P8_BUTTON_O, // Top face button
+      P8_NO_ACTION, // Near left shoulder button (L1)
+      P8_NO_ACTION, // Near right shoulder button (R1)
+      P8_NO_ACTION, // Far left shoulder button (L2)
+      P8_NO_ACTION, // Far right shoulder button (R2)
+      P8_MENU, // Left auxiliary button (select)
+      P8_MENU, // Right auxiliary button (start)
+      P8_NO_ACTION, // Left stick button
+      P8_NO_ACTION, // Right stick button
+      P8_DPAD_UP, // Dpad up
+      P8_DPAD_DOWN, // Dpad down
+      P8_DPAD_LEFT, // Dpad left
+      P8_DPAD_RIGHT, // Dpad right
+    ];
+
+    // Track which player is controller by each gamepad. Gamepad index i controls the
+    // player with index pico8_gamepads_mapping[i]. Gamepads with null player are
+    // currently unassigned - they get assigned to a player when a button is pressed.
+    var pico8_gamepads_mapping = [];
+
+    function p8_unassign_gamepad(gamepad_index) {
+      if (pico8_gamepads_mapping[gamepad_index] == null) {
+        return;
+      }
+      pico8_buttons[pico8_gamepads_mapping[gamepad_index]] = 0;
+      pico8_gamepads_mapping[gamepad_index] = null;
+    }
+
+    function p8_first_player_without_gamepad(max_players) {
+      var allocated_players = pico8_gamepads_mapping.filter(function (x) {
+        return x != null;
+      });
+      var sorted_players = Array.from(allocated_players).sort();
+      for (
+        var desired = 0;
+        desired < sorted_players.length && desired < max_players;
+        ++desired
+      ) {
+        if (desired != sorted_players[desired]) {
+          return desired;
+        }
+      }
+      if (sorted_players.length < max_players) {
+        return sorted_players.length;
+      }
+      return null;
+    }
+
+    function p8_assign_gamepad_to_player(gamepad_index, player_index) {
+      p8_unassign_gamepad(gamepad_index);
+      pico8_gamepads_mapping[gamepad_index] = player_index;
+    }
+
+    function p8_convert_standard_gamepad_to_button_state(
+      gamepad,
+      axis_threshold,
+      button_threshold
+    ) {
+      // Given a gamepad object, return:
+      // {
+      //     button_state: the binary encoded Pico 8 button state
+      //     menu_button: true if any menu-mapped button was pressed
+      //     any_button: true if any button was pressed, including d-pad
+      //         buttons and unmapped buttons
+      // }
+      if (!gamepad || !gamepad.axes || !gamepad.buttons) {
+        return {
+          button_state: 0,
+          menu_button: false,
+          any_button: false,
+        };
+      }
+      function button_state_from_axis(
+        axis,
+        low_state,
+        high_state,
+        default_state
+      ) {
+        if (axis && axis < -axis_threshold) return low_state;
+        if (axis && axis > axis_threshold) return high_state;
+        return default_state;
+      }
+      var axes_actions = [
+        button_state_from_axis(
+          gamepad.axes[0],
+          P8_DPAD_LEFT,
+          P8_DPAD_RIGHT,
+          P8_NO_ACTION
+        ),
+        button_state_from_axis(
+          gamepad.axes[1],
+          P8_DPAD_UP,
+          P8_DPAD_DOWN,
+          P8_NO_ACTION
+        ),
+      ];
+
+      var button_actions = gamepad.buttons.map(function (button, index) {
+        var pressed = button.value > button_threshold || button.pressed;
+        if (!pressed) return P8_NO_ACTION;
+        return P8_BUTTON_MAPPING[index] || P8_NO_ACTION;
+      });
+
+      var all_actions = axes_actions.concat(button_actions);
+
+      var menu_button = button_actions.some(function (action) {
+        return action.action == "menu";
+      });
+      var button_state = all_actions
+        .filter(function (a) {
+          return a.action == "button";
+        })
+        .map(function (a) {
+          return a.code;
+        })
+        .reduce(function (result, code) {
+          return result | code;
+        }, 0);
+      var any_button = gamepad.buttons.some(function (button) {
+        return button.value > button_threshold || button.pressed;
+      });
+
+      any_button |= button_state; //jww: include axes 0,1 as might be first intended action
+
+      return {
+        button_state,
+        menu_button,
+        any_button,
+      };
+    }
+
+    // jww: pico-8 0.2.1 version for unmapped gamepads, following p8_convert_standard_gamepad_to_button_state
+    // axes 0,1 & buttons 0,1,2,3 are reasonably safe. don't try to read dpad.
+    // menu buttons are unpredictable, but use 6..8 anyway (better to have a weird menu button than none)
+
+    function p8_convert_unmapped_gamepad_to_button_state(
+      gamepad,
+      axis_threshold,
+      button_threshold
+    ) {
+      if (!gamepad || !gamepad.axes || !gamepad.buttons) {
+        return {
+          button_state: 0,
+          menu_button: false,
+          any_button: false,
+        };
+      }
+
+      var button_state = 0;
+
+      if (gamepad.axes[0] && gamepad.axes[0] < -axis_threshold)
+        button_state |= 0x1;
+      if (gamepad.axes[0] && gamepad.axes[0] > axis_threshold)
+        button_state |= 0x2;
+      if (gamepad.axes[1] && gamepad.axes[1] < -axis_threshold)
+        button_state |= 0x4;
+      if (gamepad.axes[1] && gamepad.axes[1] > axis_threshold)
+        button_state |= 0x8;
+
+      // buttons: first 4 taken to be O/X, 6..8 taken to be menu button
+
+      for (j = 0; j < gamepad.buttons.length; j++)
+        if (gamepad.buttons[j].value > 0 || gamepad.buttons[j].pressed) {
+          if (j < 4)
+            button_state |=
+              0x10 << (((j + 1) / 2) & 1); // 0 1 1 0 -- A,X -> O,X on xbox360
+          else if (j >= 6 && j <= 8) button_state |= 0x40;
+        }
+
+      var menu_button = button_state & 0x40;
+
+      var any_button = gamepad.buttons.some(function (button) {
+        return button.value > button_threshold || button.pressed;
+      });
+
+      any_button |= button_state; //jww: include axes 0,1 as might be first intended action
+
+      return {
+        button_state,
+        menu_button,
+        any_button,
+      };
+    }
+
+    // gamepad  https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
+    // (sets bits in pico8_buttons[])
+    function p8_update_gamepads() {
+      var axis_threshold = 0.3;
+      var button_threshold = 0.5; // Should be unnecessary, we should be able to trust .pressed
+      var max_players = 8;
+      var gps = navigator.getGamepads() || navigator.webkitGetGamepads();
+
+      if (!gps) return;
+
+      // In Chrome, gps is iterable but it's not an array.
+      gps = Array.from(gps);
+
+      pico8_gamepads.count = gps.length;
+      while (gps.length > pico8_gamepads_mapping.length) {
+        pico8_gamepads_mapping.push(null);
+      }
+
+      var menu_button = false;
+      var gamepad_states = gps.map(function (gp) {
+        return gp && gp.mapping == "standard"
+          ? p8_convert_standard_gamepad_to_button_state(
+              gp,
+              axis_threshold,
+              button_threshold
+            )
+          : p8_convert_unmapped_gamepad_to_button_state(
+              gp,
+              axis_threshold,
+              button_threshold
+            );
+      });
+
+      // Unassign disconnected gamepads.
+      // gps.forEach(function (gp, i) { if (gp && !gp.connected) { p8_unassign_gamepad(i); }});
+      gps.forEach(function (gp, i) {
+        if (!gp || !gp.connected) {
+          p8_unassign_gamepad(i);
+        }
+      }); // https://www.lexaloffle.com/bbs/?pid=87132#p
+
+      // Assign unassigned gamepads when any button is pressed.
+      gamepad_states.forEach(function (state, i) {
+        if (state.any_button && pico8_gamepads_mapping[i] == null) {
+          var first_free_player = p8_first_player_without_gamepad(max_players);
+          p8_assign_gamepad_to_player(i, first_free_player);
+        }
+      });
+
+      // Update pico8_buttons array.
+      gamepad_states.forEach(function (gamepad_state, i) {
+        if (pico8_gamepads_mapping[i] != null) {
+          pico8_buttons[pico8_gamepads_mapping[i]] = gamepad_state.button_state;
+        }
+      });
+
+      // Update menu button.
+      // Pico 8 only recognises the menu button on the first player, so we
+      // press it when any gamepad has pressed a button mapped to menu.
+      if (
+        gamepad_states.some(function (state) {
+          return state.menu_button;
+        })
+      ) {
+        pico8_buttons[0] |= 0x40;
+      }
+
+      requestAnimationFrame(p8_update_gamepads);
+    }
+    requestAnimationFrame(p8_update_gamepads);
+
+    // End of gamepad code
+
+    // key blocker. prevent browser operations while playing cart so that PICO-8 can use those keys e.g. cursors to scroll, ctrl-r to reload
+    document.addEventListener(
+      "keydown",
+      function (event) {
+        event = event || window.event;
+        if (!p8_is_running) return;
+
+        if (pico8_state.has_focus == 1)
+          if ([32, 37, 38, 39, 40, 77, 82, 80, 9].indexOf(event.keyCode) > -1)
+            if (event.preventDefault)
+              // block only cursors, M R P, tab
+              event.preventDefault();
+      },
+      { passive: false }
+    );
+
+    // when using codo_textarea to determine focus, need to explicitly hand focus back when clicking a p8_menu_button
+    function p8_give_focus() {
+      el =
+        typeof codo_textarea === "undefined"
+          ? document.getElementById("codo_textarea")
+          : codo_textarea;
+      if (el) {
+        el.focus();
+        el.select();
+      }
+    }
+
+    function p8_request_fullscreen() {
+      var is_fullscreen =
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitIsFullScreen ||
+        document.msFullscreenElement;
+
+      if (is_fullscreen) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+        return;
+      }
+
+      var el = document.getElementById("p8_playarea");
+
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      } else if (el.mozRequestFullScreen) {
+        el.mozRequestFullScreen();
+      } else if (el.webkitRequestFullScreen) {
+        el.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+      }
+    }
+  }, []);
+
+  return (
+    <div className="body_0">
+      <div id="p8_frame_0" className="size_limit">
+        <div id="p8_frame">
+          <div id="p8_container">
+            <div id="p8_playarea">
+              <canvas id="canvas" ref={canvasRef}></canvas>
+              <textarea id="codo_textarea" className="emscripten"></textarea>
+            </div>
+          </div>
+        </div>
+
+        {/* Add content below the cart here */}
+      </div>
+    </div>
+  );
+};
+
+export default TestCart;
