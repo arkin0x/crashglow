@@ -874,7 +874,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    myWindow.p8_request_fullscreen() {
+    myWindow.p8_request_fullscreen = () => {
       const is_fullscreen =
         document.fullscreenElement ||
         document.mozFullScreenElement ||
