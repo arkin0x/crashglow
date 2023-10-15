@@ -42,14 +42,15 @@ interface CustomNavigator extends Navigator {
   webkitGetGamepads: () => Gamepad[];
 }
 
+const myWindow = window as unknown as CustomWindow;
+const document = window.document as CustomDocument;
+const navigator = window.navigator as CustomNavigator;
+
 export const Pico8Game = ({gameJS}: {gameJS: string}) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     // global vars
-    const myWindow = window as unknown as CustomWindow;
-    const document = window.document as CustomDocument;
-    const navigator = window.navigator as CustomNavigator;
     myWindow.last_windowed_container_height = 512;
     myWindow.Module = null;
     myWindow.p8_allow_mobile_menu = true;
@@ -73,15 +74,13 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     document.addEventListener("touchstart", () => {});
     document.addEventListener("touchmove", () => {});
     document.addEventListener("touchend", () => {});
-    document.addEventListener(
-      "keydown",
-      function (event) {
-        if (!myWindow.p8_is_running) return;
-        if (myWindow.pico8_state.has_focus == 1)
-          if ([32, 37, 38, 39, 40, 77, 82, 80, 9].indexOf(event.keyCode) > -1)
-            if (event.preventDefault)
-              // block only cursors, M R P, tab
-              event.preventDefault();
+    document.addEventListener( "keydown", function (event) {
+      if (!myWindow.p8_is_running) return;
+      if (myWindow.pico8_state.has_focus == 1)
+        if ([32, 37, 38, 39, 40, 77, 82, 80, 9].indexOf(event.keyCode) > -1)
+          if (event.preventDefault)
+            // block only cursors, M R P, tab
+            event.preventDefault();
       },
       { passive: false }
     );
@@ -576,6 +575,8 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       e.text = gameJS
       e.id = "e_script";
 
+      console.log(e)
+
       document.body.appendChild(e); // load and run
 
       // hide start button and show canvas / menu buttons. hide start button
@@ -900,20 +901,69 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
   }, [gameJS]);
 
   return (
-    <div className="body_0">
-      <div id="p8_frame_0" className="size_limit">
-        <div id="p8_frame">
-          <div id="p8_container">
-            <div id="p8_playarea">
-              <canvas id="canvas" ref={canvasRef}></canvas>
-              <textarea id="codo_textarea" className="emscripten"></textarea>
-            </div>
-          </div>
-        </div>
+    <div id="p8_frame_0"> 
+      <div id="p8_frame">
+        <div id="p8_menu_buttons_touch">
+          <div className="p8_menu_button" id="p8b_full" onClick={ () => { window.p8_give_focus(); p8_request_fullscreen();}}></div>
+          <div class="p8_menu_button" id="p8b_sound" onClick={ () => { p8_give_focus(); p8_create_audio_context(); Module.pico8ToggleSound();}}></div>
+		<div class="p8_menu_button" id="p8b_close" style="float:right; margin-right:10px" onClick="p8_close_cart();"></div>
+	</div>
 
-        {/* Add content below the cart here */}
-      </div>
-    </div>
+	<div id="p8_container"
+		style="margin:auto; display:table;"
+		onclick="p8_create_audio_context(); p8_run_cart();">
+
+		<div id="p8_start_button" class="p8_start_button" style="width:100%; height:100%; display:flex;">
+			<img width=80 height=80 style="margin:auto;"
+		src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAABpklEQVR42u3au23DQBCEYUXOXIGKcujQXUgFuA0XIKgW90Q9oEAg+Ljd27vd2RsCf058gEDqhofPj+OB6SMCAQlIQAIyAhKQgARkBAQDnM6XSRsB7/2e/tSA0//12fCAKsQX3ntDA4oRFwBRIc0AixE38BAhTQGLEAsBUSDNAXcRhYDRIZsAPlp99VECRoXsDpgN0g0wC6Q7IDpkGEBUyG6A0+vKBtkdMBukG2AWSHdAdMgwgKiQ4QDRIMMCokCGB4wOCQPYFVKw2cABNocUjl6wgE0gFashPKAZpHJ2TQNYBVmxW6cDFENWDv9pAUshCVgJScBKSAISkD9hPkT4GkNAMdzepyj8Kye852EBLe51CZHHWQK4JcThD1SlcHPEYY/0a+A0n6SkGZV6w6WZNb3g4Id1b7hwgGhwYQBR4dwB0eHcALPAdQfMBhcOEA0uDCAqnDsgOpwbYBa4poA/31+rZYFrBriFpwGMCtcEcA9PAhgdzhywBK8EEQXOFFCCtwaIBmcGKMWbI6LCmQBq8R6hw5kAMgISkIAEJCAjIAEJSEBGQI9ukV7lRn9nD+gAAAAASUVORK5CYII="/>
+		</div>
+
+		<div id="p8_playarea" style="display:none; margin:auto;
+				-webkit-user-select:none; -moz-user-select: none; user-select: none; -webkit-touch-callout:none;
+		">
+
+			<div  id="touch_controls_background"
+				  style=" pointer-events:none; display:none; background-color:#000;
+						 position:fixed; top:0px; left:0px; border:0; width:100vw; height:100vh">
+				&nbsp
+			</div>
+
+			<div style="display:flex; position:relative">
+				<!-- pointer-events turned off for mobile in p8_update_layout because need for desktop mouse -->
+				<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault();" >
+				</canvas>
+				<div class=p8_menu_buttons id="p8_menu_buttons" style="margin-left:10px;">
+					<div class="p8_menu_button" style="position:absolute; bottom:125px" id="p8b_controls" onClick="p8_give_focus(); Module.pico8ToggleControlMenu();"></div>					
+					<div class="p8_menu_button" style="position:absolute; bottom:90px" id="p8b_pause" onClick="p8_give_focus(); Module.pico8TogglePaused(); p8_update_layout_hash = -22;"></div>
+					<div class="p8_menu_button" style="position:absolute; bottom:55px" id="p8b_sound" onClick="p8_give_focus(); p8_create_audio_context(); Module.pico8ToggleSound();"></div>
+					<div class="p8_menu_button" style="position:absolute; bottom:20px" id="p8b_full" onClick="p8_give_focus(); p8_request_fullscreen();"></div>
+				</div>
+			</div>
+
+
+			<!-- display after first layout update -->
+			<div  id="touch_controls_gfx"
+				  style=" pointer-events:none; display:table; 
+						 position:fixed; top:0px; left:0px; border:0; width:100vw; height:100vh">
+
+					<img src="" id="controls_right_panel" style="position:absolute; opacity:0.5;">
+					<img src="" id="controls_left_panel" style="position:absolute;  opacity:0.5;">
+						
+			
+			</div> <!-- touch_controls_gfx -->
+
+			<!-- used for clipboard access & keyboard input; displayed and used by PICO-8 only once needed. can be safely removed if clipboard / key presses not needed. -->
+			<!-- (needs to be inside p8_playarea so that it still works under Chrome when fullscreened) -->
+			<!-- 0.2.5: added "display:none"; pico8.js shows on demand to avoid mac osx accent character selector // https://www.lexaloffle.com/bbs/?tid=47743 -->
+
+			<textarea id="codo_textarea" class="emscripten" style="display:none; position:absolute; left:-9999px; height:0px; overflow:hidden"></textarea>
+
+		</div> <!--p8_playarea -->
+
+	</div> <!-- p8_container -->
+
+</div> <!-- p8_frame -->
+</div> <!-- p8_frame_0 size limit --></div>
   );
 };
 
