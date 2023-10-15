@@ -774,7 +774,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // gamepad  https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
     // (sets bits in pico8_buttons[])
-    myWindow.p8_update_gamepads() {
+    myWindow.p8_update_gamepads = () => {
       const axis_threshold = 0.3;
       const button_threshold = 0.5; // Should be unnecessary, we should be able to trust .pressed
       const max_players = 8;
@@ -792,12 +792,12 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
       const gamepad_states = gps.map(function (gp: Gamepad | null) {
         return gp && gp.mapping == "standard"
-          ? p8_convert_standard_gamepad_to_button_state(
+          ? myWindow.p8_convert_standard_gamepad_to_button_state(
               gp,
               axis_threshold,
               button_threshold
             )
-          : p8_convert_unmapped_gamepad_to_button_state(
+          : myWindow.p8_convert_unmapped_gamepad_to_button_state(
               gp,
               axis_threshold,
               button_threshold
@@ -808,16 +808,16 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       // gps.forEach(function (gp, i) { if (gp && !gp.connected) { p8_unassign_gamepad(i); }});
       gps.forEach(function (gp, i) {
         if (!gp || !gp.connected) {
-          p8_unassign_gamepad(i);
+          myWindow.p8_unassign_gamepad(i);
         }
       }); // https://www.lexaloffle.com/bbs/?pid=87132#p
 
       // Assign unassigned gamepads when any button is pressed.
       gamepad_states.forEach(function (state, i) {
         if (state.any_button && myWindow.pico8_gamepads_mapping[i] == null) {
-          const first_free_player = p8_first_player_without_gamepad(max_players);
+          const first_free_player = myWindow.p8_first_player_without_gamepad(max_players);
           if (first_free_player != null)
-            p8_assign_gamepad_to_player(i, first_free_player);
+            myWindow.p8_assign_gamepad_to_player(i, first_free_player);
         }
       });
 
@@ -839,9 +839,9 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         myWindow.pico8_buttons[0] |= 0x40;
       }
 
-      requestAnimationFrame(p8_update_gamepads);
+      requestAnimationFrame(myWindow.p8_update_gamepads);
     }
-    requestAnimationFrame(p8_update_gamepads);
+    requestAnimationFrame(myWindow.p8_update_gamepads);
 
     // End of gamepad code
 
@@ -864,7 +864,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     // when using codo_textarea to determine focus, need to explicitly hand focus back when clicking a p8_menu_button
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    myWindow.p8_give_focus() {
+    myWindow.p8_give_focus = () => {
       const el = document.getElementById("codo_textarea") as HTMLTextAreaElement
       if (el) {
         el.focus();
