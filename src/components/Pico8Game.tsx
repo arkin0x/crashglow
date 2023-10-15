@@ -36,6 +36,7 @@ interface CustomWindow extends Window {
   p8_assign_gamepad_to_player: (gamepad_index: number, player_index: number) => void;
   p8_update_gamepads: () => void;
   p8_convert_standard_gamepad_to_button_state: (gamepad: Gamepad, axis_threshold: number, button_threshold: number ) => {button_state: number, menu_button: number | boolean, any_button: number | boolean};
+  p8_convert_unmapped_gamepad_to_button_state : (gamepad: Gamepad | null, axis_threshold: number, button_threshold: number ) => {button_state: number, menu_button: number | boolean, any_button: number | boolean};
 }
 
 interface CustomDocument extends Document {
@@ -720,11 +721,11 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     // axes 0,1 & buttons 0,1,2,3 are reasonably safe. don't try to read dpad.
     // menu buttons are unpredictable, but use 6..8 anyway (better to have a weird menu button than none)
 
-    myWindow.p8_convert_unmapped_gamepad_to_button_state(
+    myWindow.p8_convert_unmapped_gamepad_to_button_state = (
       gamepad: Gamepad | null,
       axis_threshold: number,
       button_threshold: number
-    ) {
+    ) => {
       if (!gamepad || !gamepad.axes || !gamepad.buttons) {
         return {
           button_state: 0,
@@ -767,7 +768,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       return {
         button_state,
         menu_button,
-        any_button_bin,
+        any_button: any_button_bin,
       };
     }
 
