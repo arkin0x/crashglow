@@ -27,6 +27,15 @@ interface CustomWindow extends Window {
   mozAudioContext?: AudioContext;
   oAudioContext?: AudioContext;
   msAudioContext?: AudioContext;
+  p8_update_button_icons: () => void;
+  p8_update_layout: () => void;
+  p8_create_audio_context: () => void;
+  p8_close_cart: () => void;
+  p8_unassign_gamepad: (gamepad_index: number) => void;
+  p8_first_player_without_gamepad: (max_players: number) => number | null;
+  p8_assign_gamepad_to_player: (gamepad_index: number, player_index: number) => void;
+  p8_update_gamepads: () => void;
+  p8_convert_standard_gamepad_to_button_state: (gamepad: Gamepad, axis_threshold: number, button_threshold: number ) => {button_state: number, menu_button: number | boolean, any_button: number | boolean};
 }
 
 interface CustomDocument extends Document {
@@ -87,10 +96,10 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    function p8_update_button_icons() {
+    myWindow.p8_update_button_icons = () => {
       // buttons only appear when running
       if (!myWindow.p8_is_running) {
-        requestAnimationFrame(p8_update_button_icons);
+        requestAnimationFrame(myWindow.p8_update_button_icons);
         return;
       }
       const is_fullscreen =
@@ -106,7 +115,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       if (is_fullscreen) hash += 0x400;
 
       if (myWindow.p8_buttons_hash == hash) {
-        requestAnimationFrame(p8_update_button_icons);
+        requestAnimationFrame(myWindow.p8_update_button_icons);
         return;
       }
 
@@ -146,7 +155,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         if (is_visible) el.style.display = "";
         else el.style.display = "none";
       }
-      requestAnimationFrame(p8_update_button_icons);
+      requestAnimationFrame(myWindow.p8_update_button_icons);
     }
 
     function abs(x: number) {
@@ -253,7 +262,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    function p8_update_layout() {
+    myWindow.p8_update_layout = () => {
       const canvas = document.getElementById("canvas");
       const p8_playarea = document.getElementById("p8_playarea");
       const p8_container = document.getElementById("p8_container");
@@ -265,7 +274,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       // page didn't load yet? first call should be after p8_frame is created so that layout doesn't jump around.
       if (!canvas || !p8_playarea || !p8_container || !p8_frame) {
         myWindow.p8_update_layout_hash = -1;
-        requestAnimationFrame(p8_update_layout);
+        requestAnimationFrame(myWindow.p8_update_layout);
         return;
       }
 
@@ -354,7 +363,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
           if (myWindow.p8_update_layout_hash == update_hash) {
             // mobile: update every frame because nothing can be trusted
             //console.log("p8_update_layout(): skipping");
-            requestAnimationFrame(p8_update_layout);
+            requestAnimationFrame(myWindow.p8_update_layout);
             return;
           }
       myWindow.p8_update_layout_hash = update_hash;
@@ -445,7 +454,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
         el = document.getElementById("p8_start_button") as HTMLElement;
         if (el) el.style.display = "flex";
       }
-      requestAnimationFrame(p8_update_layout);
+      requestAnimationFrame(myWindow.p8_update_layout);
     }
 
     addEventListener(
@@ -462,7 +471,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       { passive: true }
     );
 
-    function p8_create_audio_context() {
+    myWindow.p8_create_audio_context = () => {
       if (myWindow.pico8_audio_context) {
         try {
           myWindow.pico8_audio_context.resume();
@@ -502,14 +511,14 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    function p8_close_cart() {
+    myWindow.p8_close_cart = () => {
       // just reload page! used for touch buttons -- hard to roll back state
       window.location.hash = ""; // triggers reload
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    function p8_run_cart() {
+    myWindow.p8_run_cart = () => {
       if (myWindow.p8_is_running) return;
       myWindow.p8_is_running = true;
 
@@ -524,7 +533,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       }
 
       // create audio context and wake it up (for iOS -- needs happen inside touch event)
-      p8_create_audio_context();
+      myWindow.p8_create_audio_context();
 
       // show touch elements
       const els = document.getElementsByClassName("p8_controller_area") as HTMLCollection
@@ -594,7 +603,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       }
     }
 
-    function p8_unassign_gamepad(gamepad_index: number) {
+    myWindow.p8_unassign_gamepad = (gamepad_index: number) => {
       if (myWindow.pico8_gamepads_mapping[gamepad_index] == null) {
         return;
       }
@@ -602,7 +611,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       myWindow.pico8_gamepads_mapping[gamepad_index] = null;
     }
 
-    function p8_first_player_without_gamepad(max_players: number) {
+    myWindow.p8_first_player_without_gamepad = (max_players: number) => {
       const allocated_players = myWindow.pico8_gamepads_mapping.filter(function (x) {
         return x != null;
       });
@@ -622,16 +631,16 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       return null;
     }
 
-    function p8_assign_gamepad_to_player(gamepad_index: number, player_index: number) {
-      p8_unassign_gamepad(gamepad_index);
+    myWindow.p8_assign_gamepad_to_player = (gamepad_index: number, player_index: number) => {
+      myWindow.p8_unassign_gamepad(gamepad_index);
       myWindow.pico8_gamepads_mapping[gamepad_index] = player_index;
     }
 
-    function p8_convert_standard_gamepad_to_button_state(
+    myWindow.p8_convert_standard_gamepad_to_button_state = (
       gamepad: Gamepad,
       axis_threshold: number,
       button_threshold: number
-    ) {
+    ) => {
       // Given a gamepad object, return:
       // {
       //     button_state: the binary encoded Pico 8 button state
@@ -703,7 +712,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       return {
         button_state,
         menu_button,
-        any_button_bin,
+        any_button: any_button_bin,
       };
     }
 
@@ -711,7 +720,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     // axes 0,1 & buttons 0,1,2,3 are reasonably safe. don't try to read dpad.
     // menu buttons are unpredictable, but use 6..8 anyway (better to have a weird menu button than none)
 
-    function p8_convert_unmapped_gamepad_to_button_state(
+    myWindow.p8_convert_unmapped_gamepad_to_button_state(
       gamepad: Gamepad | null,
       axis_threshold: number,
       button_threshold: number
@@ -764,7 +773,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // gamepad  https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
     // (sets bits in pico8_buttons[])
-    function p8_update_gamepads() {
+    myWindow.p8_update_gamepads() {
       const axis_threshold = 0.3;
       const button_threshold = 0.5; // Should be unnecessary, we should be able to trust .pressed
       const max_players = 8;
@@ -854,7 +863,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
     // when using codo_textarea to determine focus, need to explicitly hand focus back when clicking a p8_menu_button
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    function p8_give_focus() {
+    myWindow.p8_give_focus() {
       const el = document.getElementById("codo_textarea") as HTMLTextAreaElement
       if (el) {
         el.focus();
@@ -864,7 +873,7 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    function p8_request_fullscreen() {
+    myWindow.p8_request_fullscreen() {
       const is_fullscreen =
         document.fullscreenElement ||
         document.mozFullScreenElement ||
@@ -905,13 +914,13 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
       <div id="p8_frame">
         <div id="p8_menu_buttons_touch">
           <div className="p8_menu_button" id="p8b_full" onClick={ () => { window.p8_give_focus(); p8_request_fullscreen();}}></div>
-          <div class="p8_menu_button" id="p8b_sound" onClick={ () => { p8_give_focus(); p8_create_audio_context(); Module.pico8ToggleSound();}}></div>
-		<div class="p8_menu_button" id="p8b_close" style="float:right; margin-right:10px" onClick="p8_close_cart();"></div>
+          <div class="p8_menu_button" id="p8b_sound" onClick={ () => { p8_give_focus(); myWindow.p8_create_audio_context(); Module.pico8ToggleSound();}}></div>
+		<div class="p8_menu_button" id="p8b_close" style="float:right; margin-right:10px" onClick="myWindow.p8_close_cart();"></div>
 	</div>
 
 	<div id="p8_container"
 		style="margin:auto; display:table;"
-		onclick="p8_create_audio_context(); p8_run_cart();">
+		onclick="myWindow.p8_create_audio_context(); p8_run_cart();">
 
 		<div id="p8_start_button" class="p8_start_button" style="width:100%; height:100%; display:flex;">
 			<img width=80 height=80 style="margin:auto;"
@@ -934,8 +943,8 @@ export const Pico8Game = ({gameJS}: {gameJS: string}) => {
 				</canvas>
 				<div class=p8_menu_buttons id="p8_menu_buttons" style="margin-left:10px;">
 					<div class="p8_menu_button" style="position:absolute; bottom:125px" id="p8b_controls" onClick="p8_give_focus(); Module.pico8ToggleControlMenu();"></div>					
-					<div class="p8_menu_button" style="position:absolute; bottom:90px" id="p8b_pause" onClick="p8_give_focus(); Module.pico8TogglePaused(); p8_update_layout_hash = -22;"></div>
-					<div class="p8_menu_button" style="position:absolute; bottom:55px" id="p8b_sound" onClick="p8_give_focus(); p8_create_audio_context(); Module.pico8ToggleSound();"></div>
+					<div class="p8_menu_button" style="position:absolute; bottom:90px" id="p8b_pause" onClick="p8_give_focus(); Module.pico8TogglePaused(); myWindow.p8_update_layout_hash = -22;"></div>
+					<div class="p8_menu_button" style="position:absolute; bottom:55px" id="p8b_sound" onClick="p8_give_focus(); myWindow.p8_create_audio_context(); Module.pico8ToggleSound();"></div>
 					<div class="p8_menu_button" style="position:absolute; bottom:20px" id="p8b_full" onClick="p8_give_focus(); p8_request_fullscreen();"></div>
 				</div>
 			</div>
