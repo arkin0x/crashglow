@@ -37,6 +37,7 @@ export const publishKind1 = async (ndk: NDKType, title: string, content: string)
   const ndkEvent = new NDKEvent(ndk)
   ndkEvent.tags.push(['subject', title])
   ndkEvent.tags.push(['u', `${uuid}:${semver}`])
+  ndkEvent.tags.push(['t','crashglow'])
   ndkEvent.tags.push(['relays', ...ndk.explicitRelayUrls])
   // TODO: replace domain
   ndkEvent.tags.push(['alt', `This note represents the box of a a web-based video game. Play it at https://domain.com/game/${uuid}:${semver}`])

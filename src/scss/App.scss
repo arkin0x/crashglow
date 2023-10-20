@@ -1,30 +1,136 @@
+// @font-face {
+//   font-family: 'Delta Gothic One';
+//   src: local('DelaGothicOne-Regular') url('@/assets/DelaGothicOne-Regular.ttf') format('truetype');
+//   font-weight: 400;
+//   font-style: normal;
+// }
+
+// TODO: replace this with a local font so Google doesn't spy on us
+// Do I need to use this? https://github.com/cssninjaStudio/unplugin-fonts#custom-fonts
 @import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap');
+
+$green: #d5ff72;
+$purple: #535bf2;
+$text-color: rgba(255, 255, 255, 0.87);
+$underline-color: #fff6;
+$header-height: 10svh;
+$footer-height: 10svh;
+$white-glass: rgba(255, 255, 255, 0.377);
+$headline-color: $green;
+$highlight-bg: $green;
+$anchor-color: #646cff;
+$anchor-color-hover: $purple; 
+
+:root {
+  color: $text-color; 
+}
 
 * {
   box-sizing: border-box;
 }
 
 html, body {
-  cursor: crosshair;
-  background: url(../assets/arcade-bg-2.png) no-repeat center center;
-  background-size: cover;
-  font-size: 18px;
+  // cursor: crosshair;
+  // background: url(../assets/arcade-bg-2.png) no-repeat center center;
+  // background-size: cover;
+  font-size: 16px;
 }
 
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  text-align: center;
+  // text-align: center;
 }
 
 #app {
-  background-color: #000c;
+  background-color: #000;
+  // background-color: #fff;
   // blur filter on background
+  // backdrop-filter: blur(10px);
+  // transition: all 500ms ease-in;
+  width: 100svw;
+  height: 100svh;
+  overflow-x: hidden;
+}
+
+#header, #footer {
   backdrop-filter: blur(10px);
-  border-radius: 0.2rem;
-  padding: 2rem;
-  margin-bottom: 10vh;
-  transition: all 500ms ease-in;
+  background: $white-glass;
+  display: flex;
+  height: 10svh;
+  left: 0;
+  margin-bottom: 3rem;
+  overflow: hidden;
+  position: fixed;
+  // position: sticky;
+  top: 0;
+  width: 100svw;
+  z-index: 100;
+}
+
+#app-name {
+  // color: #d8ff9bcc;
+  font-size: 1.25rem;
+  color: $headline-color;
+  margin: auto;
+  transform: translateX(calc($header-height / -2));
+}
+
+
+#footer {
+  top: inherit;
+  bottom: 0;
+  margin-bottom: 0;
+  justify-content: space-evenly;
+}
+
+.nav-button {
+  font-size: 0.8em;
+  background: transparent;
+  border: 0px solid transparent;
+  width: 100%;
+  transition: all 250ms ease;
+  &:hover {
+    cursor: pointer;
+    color: #000;
+    background: $highlight-bg;
+  }
+}
+
+.primary {
+  min-height: calc(calc($header-height + $footer-height) + 80vh);
+  // height: 100svh;
+  padding-top: 0svh;
+  // transform: translateY(-10svh);
+  z-index: 1;
+  // margin-bottom: -10svh;
+}
+
+.layout {
+  min-height: 100%;
+  padding: $header-height 1rem;
+  backdrop-filter: blur(5px);
+}
+.game-layout {
+  padding-top: 40%;
+  // margin: auto;
+}
+
+h2 {
+  border-bottom: 2px solid $underline-color; 
+  display: block;
+  width: 100%;
+}
+
+
+#component-home {
+  background: url(../assets/arcade-bg-2.png) no-repeat center center;
+  background-size: cover;
+}
+
+#component-retrieve {
+  background: url(../assets/arcade-bg-2.png) no-repeat center center;
+  background-size: cover;
 }
 
 #app:hover {
@@ -33,40 +139,12 @@ html, body {
   background-color: #1116;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
 .card {
+  // border: 1px solid #000;
+  border-radius: 2px;
+  background: $white-glass;
+  // backdrop-filter: blur(20px);
   padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
 
 input {
@@ -80,11 +158,11 @@ input {
 }
 
 hr {
-  border: 1px dashed #aa62da;
-  margin: -0.5em 0 2em 0;
+  border: 1px dashed #fff;
+  margin: 2em 0;
 }
 
-h1, button {
+h1, h2, h3, h4, h5, h6, button {
   font-family: 'Dela Gothic One', sans-serif;
   text-transform: uppercase;
   font-style: italic;
@@ -96,4 +174,23 @@ ul, li {
 
 .left {
   text-align: left;
+}
+
+.button {
+  color: #000;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  background-color: $green; 
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+.button:hover {
+  border-color: #646cff;
+}
+.button:focus,
+.button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }

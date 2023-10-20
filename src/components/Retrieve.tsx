@@ -1,8 +1,9 @@
 import { useRef, useState, useContext } from 'react'
 import { nip19 } from 'nostr-tools'
 import { NDKContext } from '../providers/NDKProvider'
-import { canDecode, isHex, replaceScript } from '../libraries/utils'
+import { canDecode, isHex } from '../libraries/utils'
 import { BLOB, stitchChunks } from '../libraries/PublishGame'
+import Pico8Game from './Pico8Game'
 
 // TODO: support NIP19 nevents as well as hex
 
@@ -35,31 +36,39 @@ export const Retrieve = () => {
     setAssets(assets)
   }
 
-  const getHTMLAsset = () => {
-    let html = '', js = ''
+  const loadGame = () => {
+    if (Object.keys(assets).length === 0) return null
+
+    let js = ''
+    // let html = null
     for (const [key, value] of Object.entries(assets)) {
-      if (key.split(':')[0] === 'text/html') {
-        html = value
-      }
-      if (key.split(':')[0] === 'text/javascript') {
+      // if (key.startsWith('text/html')) {
+      //   html = value
+      // }
+      if (key.startsWith('text/javascript')) {
         js = value
       }
     }
-    return replaceScript(html, js)
+    return <Pico8Game gameJS={js} />
   }
 
   return (
-    <div className="card">
-      <label htmlFor="nevent">Enter game nevent:</label><br/>
-      <br/>
-      <input ref={neventRef} type="text" placeholder="Event name" />
-      <br/>
-      <br/>
-      <button disabled={gettingGame} onClick={getGame}>Play 🕹️</button>
-      { getHTMLAsset() ? <div id="play-frame">
+    <div id="component-retrieve" className="primary">
+      { Object.keys(assets).length > 0 ? 
+      <div className="game-layout">{loadGame()}</div> : 
+      <div className="layout">
+        <h2>Load a Game</h2>
+        <label htmlFor="nevent">Enter game nevent:</label><br/>
         <br/>
-        <iframe width="500px" height="500px" srcDoc={getHTMLAsset()} />
-      </div> : null }
+        <input ref={neventRef} type="text" placeholder="Event name" />
+        <br/>
+        <br/>
+        <button className="button" disabled={gettingGame} onClick={getGame}>Play 🕹️</button>
+        <div id="play-frame">
+          <br/>
+          { loadGame() }
+        </div>
+      </div> }
     </div>
   )
 }
