@@ -92,8 +92,10 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
 
   useEffect(() => {
     // global vars
+    myWindow.Module = {
+      canvas: document.getElementById("canvas"),
+    }
     myWindow.last_windowed_container_height = 512;
-    myWindow.Module = null;
     myWindow.p8_allow_mobile_menu = true;
     myWindow.p8_autoplay = false;
     myWindow.p8_buttons_hash = -1;
