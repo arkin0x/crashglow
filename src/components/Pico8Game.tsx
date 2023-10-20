@@ -88,31 +88,36 @@ const myWindow = window as unknown as CustomWindow;
 const document = window.document as CustomDocument;
 const navigator = window.navigator as CustomNavigator;
 
+const initializeWindow = () => {
+  // global vars
+  myWindow.Module = {
+    canvas: document.getElementById("canvas"),
+  }
+  myWindow.last_windowed_container_height = 512;
+  myWindow.p8_allow_mobile_menu = true;
+  myWindow.p8_autoplay = false;
+  myWindow.p8_buttons_hash = -1;
+  myWindow.p8_is_running = false;
+  myWindow.p8_layout_frames = 0;
+  myWindow.p8_script = null;
+  myWindow.p8_touch_detected = false;
+  myWindow.p8_update_layout_hash = -1;
+  myWindow.pico8_audio_context;
+  myWindow.pico8_buttons = [0, 0, 0, 0, 0, 0, 0, 0]; // max 8 players
+  myWindow.pico8_gamepads = {};
+  myWindow.pico8_gamepads_mapping = [];
+  myWindow.pico8_gamepads.count = 0;
+  myWindow.pico8_gpio = new Array(128);
+  myWindow.pico8_mouse = [];
+  myWindow.pico8_state = [] as p8state;
+  myWindow.p8_touch_detected = false;
+}
+
 export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
 
   useEffect(() => {
-    // global vars
-    myWindow.Module = {
-      canvas: document.getElementById("canvas"),
-    }
-    myWindow.last_windowed_container_height = 512;
-    myWindow.p8_allow_mobile_menu = true;
-    myWindow.p8_autoplay = false;
-    myWindow.p8_buttons_hash = -1;
-    myWindow.p8_is_running = false;
-    myWindow.p8_layout_frames = 0;
-    myWindow.p8_script = null;
-    myWindow.p8_touch_detected = false;
-    myWindow.p8_update_layout_hash = -1;
-    myWindow.pico8_audio_context;
-    myWindow.pico8_buttons = [0, 0, 0, 0, 0, 0, 0, 0]; // max 8 players
-    myWindow.pico8_gamepads = {};
-    myWindow.pico8_gamepads_mapping = [];
-    myWindow.pico8_gamepads.count = 0;
-    myWindow.pico8_gpio = new Array(128);
-    myWindow.pico8_mouse = [];
-    myWindow.pico8_state = [] as p8state;
-    myWindow.p8_touch_detected = false;
+
+    initializeWindow()
 
     document.addEventListener("touchstart", () => {});
     document.addEventListener("touchmove", () => {});
@@ -632,7 +637,13 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
           myWindow.p8_buttons_hash = -33;
       };
       e.type = "application/javascript";
-      e.text = gameJS;
+      e.text = `
+        try {
+          ${gameJS}
+        } catch (err) {
+          console.log(err);
+        }
+      `;
       e.id = "e_script";
 
       console.log(e);
@@ -969,6 +980,7 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
 
     return () => {
       // probably just refresh the page... but when?
+      initializeWindow();
     };
   }, [gameJS]);
 
