@@ -2,11 +2,12 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { Home } from './Home'
 import { Publish } from './Publish'
 import { NDKProvider } from '../providers/NDKProvider'
-import '../scss/App.scss'
+import { Footer } from './Footer'
 import logo from '../assets/tech_cabinet-0.png'
+import '../scss/App.scss'
+import { Retrieve } from './Retrieve'
 
 export const App = () => {
-
   return (
     <>
     <div id="app">
@@ -18,12 +19,12 @@ export const App = () => {
         <Router>
           <Routes>
             <Route path="/" element={<Home/>}/>
+            <Route path="/load" element={<Retrieve/>}/>
             <Route path="/publish" element={<Publish/>} />
           </Routes>
+          <Footer/>
         </Router>
       </NDKProvider>
-      <footer id="footer">
-      </footer>
     </div>
     </>
   )

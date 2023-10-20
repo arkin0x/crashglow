@@ -9,6 +9,21 @@
 // Do I need to use this? https://github.com/cssninjaStudio/unplugin-fonts#custom-fonts
 @import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap');
 
+$green: #d5ff72;
+$purple: #535bf2;
+$text-color: rgba(255, 255, 255, 0.87);
+$underline-color: #fff6;
+$header-height: 10svh;
+$footer-height: 10svh;
+$white-glass: rgba(255, 255, 255, 0.377);
+$headline-color: $green;
+$highlight-bg: $green;
+$anchor-color: #646cff;
+$anchor-color-hover: $purple; 
+
+:root {
+  color: $text-color; 
+}
 
 * {
   box-sizing: border-box;
@@ -18,7 +33,7 @@ html, body {
   // cursor: crosshair;
   // background: url(../assets/arcade-bg-2.png) no-repeat center center;
   // background-size: cover;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 #root {
@@ -38,12 +53,6 @@ html, body {
   overflow-x: hidden;
 }
 
-$header-color: #fffc;
-
-$header-height: 10svh;
-$footer-height: 10svh;
-$white-glass: rgba(255, 222, 250, 0.377);
-
 #header, #footer {
   backdrop-filter: blur(10px);
   background: $white-glass;
@@ -57,38 +66,69 @@ $white-glass: rgba(255, 222, 250, 0.377);
   top: 0;
   width: 100svw;
   z-index: 100;
-  h1 {
-    margin: auto;
-  }
 }
+
+#app-name {
+  // color: #d8ff9bcc;
+  font-size: 1.25rem;
+  color: $headline-color;
+  margin: auto;
+  transform: translateX(calc($header-height / -2));
+}
+
 
 #footer {
   top: inherit;
   bottom: 0;
   margin-bottom: 0;
+  justify-content: space-evenly;
 }
 
-#app-name {
-  // color: #d8ff9bcc;
-  color: #ffffff;
+.nav-button {
+  font-size: 0.8em;
+  background: transparent;
+  border: 0px solid transparent;
+  width: 100%;
+  transition: all 250ms ease;
+  &:hover {
+    cursor: pointer;
+    color: #000;
+    background: $highlight-bg;
+  }
 }
 
 .primary {
-  height: calc(calc($header-height + $footer-height) + 100vh);
+  min-height: calc(calc($header-height + $footer-height) + 80vh);
   // height: 100svh;
-  transform: translateY(-10svh);
+  padding-top: 0svh;
+  // transform: translateY(-10svh);
   z-index: 1;
   // margin-bottom: -10svh;
 }
 
 .layout {
-  height: 100%;
-  padding: 3rem;
+  min-height: 100%;
+  padding: $header-height 1rem;
   backdrop-filter: blur(5px);
+}
+.game-layout {
+  padding-top: 40%;
+  // margin: auto;
+}
+
+h2 {
+  border-bottom: 2px solid $underline-color; 
+  display: block;
+  width: 100%;
 }
 
 
 #component-home {
+  background: url(../assets/arcade-bg-2.png) no-repeat center center;
+  background-size: cover;
+}
+
+#component-retrieve {
   background: url(../assets/arcade-bg-2.png) no-repeat center center;
   background-size: cover;
 }
@@ -134,4 +174,23 @@ ul, li {
 
 .left {
   text-align: left;
+}
+
+.button {
+  color: #000;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  background-color: $green; 
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+.button:hover {
+  border-color: #646cff;
+}
+.button:focus,
+.button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }

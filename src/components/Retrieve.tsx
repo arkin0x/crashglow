@@ -53,17 +53,22 @@ export const Retrieve = () => {
   }
 
   return (
-    <div className="card">
-      <label htmlFor="nevent">Enter game nevent:</label><br/>
-      <br/>
-      <input ref={neventRef} type="text" placeholder="Event name" />
-      <br/>
-      <br/>
-      <button disabled={gettingGame} onClick={getGame}>Play 🕹️</button>
-      <div id="play-frame">
+    <div id="component-retrieve" className="primary">
+      { Object.keys(assets).length > 0 ? 
+      <div className="game-layout">{loadGame()}</div> : 
+      <div className="layout">
+        <h2>Load a Game</h2>
+        <label htmlFor="nevent">Enter game nevent:</label><br/>
         <br/>
-        { loadGame() }
-      </div>
+        <input ref={neventRef} type="text" placeholder="Event name" />
+        <br/>
+        <br/>
+        <button className="button" disabled={gettingGame} onClick={getGame}>Play 🕹️</button>
+        <div id="play-frame">
+          <br/>
+          { loadGame() }
+        </div>
+      </div> }
     </div>
   )
 }

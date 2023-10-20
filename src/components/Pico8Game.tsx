@@ -1003,7 +1003,7 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
 
         <div
           id="p8_container"
-          style={{ margin: "auto", display: "table" }}
+          style={{ margin: "auto", display: "table", width: "100%", height: "100%" }}
           onClick={() => {
             myWindow.p8_create_audio_context();
             myWindow.p8_run_cart();
@@ -1015,8 +1015,6 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
             style={{ width: "100%", height: "100%", display: "flex" }}
           >
             <img
-              width="80"
-              height="80"
               style={{ margin: "auto" }}
               src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAABpklEQVR42u3au23DQBCEYUXOXIGKcujQXUgFuA0XIKgW90Q9oEAg+Ljd27vd2RsCf058gEDqhofPj+OB6SMCAQlIQAIyAhKQgARkBAQDnM6XSRsB7/2e/tSA0//12fCAKsQX3ntDA4oRFwBRIc0AixE38BAhTQGLEAsBUSDNAXcRhYDRIZsAPlp99VECRoXsDpgN0g0wC6Q7IDpkGEBUyG6A0+vKBtkdMBukG2AWSHdAdMgwgKiQ4QDRIMMCokCGB4wOCQPYFVKw2cABNocUjl6wgE0gFashPKAZpHJ2TQNYBVmxW6cDFENWDv9pAUshCVgJScBKSAISkD9hPkT4GkNAMdzepyj8Kye852EBLe51CZHHWQK4JcThD1SlcHPEYY/0a+A0n6SkGZV6w6WZNb3g4Id1b7hwgGhwYQBR4dwB0eHcALPAdQfMBhcOEA0uDCAqnDsgOpwbYBa4poA/31+rZYFrBriFpwGMCtcEcA9PAhgdzhywBK8EEQXOFFCCtwaIBmcGKMWbI6LCmQBq8R6hw5kAMgISkIAEJCAjIAEJSEBGQI9ukV7lRn9nD+gAAAAASUVORK5CYII="
             />
@@ -1030,6 +1028,8 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
               MozUserSelect: "none",
               userSelect: "none",
               WebkitTouchCallout: "none",
+              height: "100%",
+              width: "100%"
             }}
           >
             <div
@@ -1049,7 +1049,7 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
               &nbsp
             </div>
 
-            <div style={{ display: "flex", position: "relative" }}>
+            <div style={{ display: "flex", position: "relative", height: "100%", width: "100%" }}>
               <canvas
                 className="emscripten"
                 id="canvas"
