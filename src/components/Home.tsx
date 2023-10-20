@@ -1,6 +1,7 @@
 import { useEffect, useContext, useState } from 'react'
 import { NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKContext } from '../providers/NDKProvider'
+import { Publish } from './Publish'
 
 export const Home = () => {
   const ndk = useContext(NDKContext)
@@ -32,6 +33,7 @@ export const Home = () => {
       <div className="layout">
         <h2>Games</h2>
         { latestGames() }
+        <Publish/>
       </div>
     </div>
   )

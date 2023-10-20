@@ -35,9 +35,9 @@ export const Publish = () => {
   }
 
   useEffect(() => {
-    if (window.nostr) {
-      activatePlugin()
-    }
+    // if (window.nostr) {
+    //   activatePlugin()
+    // }
   }, [])
 
   const publish = async () => {
@@ -65,35 +65,34 @@ export const Publish = () => {
 
   return (
     <>
-    <div className="card">
-      <h1>Publish a game</h1>
+      <h2>Publish a game</h2>
       { extensionReady ?
       <>
-        <h2 className="left">Supported web game formats:</h2>
+        <h3 className="left">Supported web game formats:</h3>
         <ul>
           <li>PICO-8 Web Export</li>
-          <li><em>Maybe</em> other HTML/JS games. Give it a shot!</li>
+          {/* <li><em>Maybe</em> other HTML/JS games. Give it a shot!</li> */}
         </ul>
         <p className="left">
-          Select the HTML and JavaScript files that make up your game.
+          Select the PICO-8 JavaScript file that you exported from your game.
         </p>
-        <input required ref={uploadRef} type="file" multiple accept='html,js,png,jpg,jpeg,gif' />
+        <div className="card">
+          <input required ref={uploadRef} type="file" multiple accept='html,js,png,jpg,jpeg,gif' />
+          <br/>
+          <br/>
+          <input required id="game-title" ref={titleRef} placeholder="Enter game title" />
+          <br/>
+          <br/>
+          <textarea ref={contentRef} placeholder="Enter game description" />
+        </div>
         <br/>
         <br/>
-        <input required id="game-title" ref={titleRef} placeholder="Enter game title" />
-        <br/>
-        <br/>
-        <textarea ref={contentRef} placeholder="Enter game description" />
-        <br/>
-        <br/>
-        <button onClick={publish}>Publish 🚀</button>
+        <button className="button" onClick={publish}>Publish 🚀</button>
       </>
-      : <button type="button" onClick={activatePlugin}>{publishButton}</button> }
-    </div>
+      : <button className="button" type="button" onClick={activatePlugin}>{publishButton}</button> }
     <br/>
     <br/>
-    <hr/>
-    <button onClick={() => navigate('/')}>⏮ Go Back</button>
+    <br/>
     </>
   )
 }
