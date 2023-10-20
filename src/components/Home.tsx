@@ -1,48 +1,38 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Retrieve } from './Retrieve'
-
-const PUBLISH_BUTTON_TEXT = "Publish ✨"
+import { useEffect, useContext, useState } from 'react'
+import { NDKEvent } from '@nostr-dev-kit/ndk'
+import { NDKContext } from '../providers/NDKProvider'
 
 export const Home = () => {
-  const navigate = useNavigate()
-  const [publishButton, setPublishButton] = useState<string>(PUBLISH_BUTTON_TEXT)
-  const [extensionReady, setExtensionReady] = useState<boolean | null>(false)
+  const ndk = useContext(NDKContext)
+  const [games, setGames] = useState<NDKEvent[]>([])
 
-  const activatePlugin = async () => {
-    if (extensionReady) {
-      proceedToPublish()
-    } else if (extensionReady === false ) {
-      setPublishButton("Waiting for Nostr extension...")
-      try {
-        if (window.nostr){
-          await window.nostr.getPublicKey()
-          setExtensionReady(true)
-          proceedToPublish()
-        }
-      } catch (e) {
-        // extension failed
-        setPublishButton("Nostr extension failed to connect. Retry?")
-        setExtensionReady(null)
-        // setTimeout(activatePlugin, 2000)
-      }
-    } else if (extensionReady === null ){
-      window.location.reload()
+  useEffect(() => {
+    if (!ndk) return
+    const fetchLatestGames = async () => {
+      const loaded = await ndk.fetchEvents({ kinds: [1], limit: 10, "#t": ["crashglow"] })
+      setGames(Array.from(loaded))
     }
-  }
+    fetchLatestGames()
+  }, [ndk])
 
-  const proceedToPublish = () => {
-    navigate('/publish')
+  const latestGames = () => {
+    const latest = games.map((game) => {
+      return (
+        <div key={game.id}>
+          <h3>{game.tags.find((tag) => tag[0] === 'subject')![1]}</h3>
+          <p>{game.content}</p>
+        </div>
+      )
+    })
+    if (latest.length === 0) return <p>No games found! 😿</p>
   }
 
   return (
-    <div id="component-home">
-      <h1>Crashglow</h1>
-      <h2>Distributed Arcade on Nostr</h2>
-      <h3>Powered by Magic Internet Money!</h3>
-      <Retrieve/>
-      <hr/>
-      <button type="button" onClick={activatePlugin}>{publishButton}</button>
+    <div id="component-home" className="primary">
+      <div className="layout">
+        <h2>Games</h2>
+        { latestGames() }
+      </div>
     </div>
   )
 }

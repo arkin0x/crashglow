@@ -9,8 +9,11 @@ export const App = () => {
 
   return (
     <>
-    <img src={logo} alt="logo" />
     <div id="app">
+      <header id="header">
+        <img id="logo" className="flex-across" src={logo} alt="logo" />
+        <h1 id="app-name" className="flex-across">Crash Glow</h1>
+      </header>
       <NDKProvider>
         <Router>
           <Routes>
@@ -19,6 +22,8 @@ export const App = () => {
           </Routes>
         </Router>
       </NDKProvider>
+      <footer id="footer">
+      </footer>
     </div>
     </>
   )
