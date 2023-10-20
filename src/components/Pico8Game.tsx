@@ -1025,7 +1025,6 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
           <div
             id="p8_playarea"
             style={{
-              display: "none",
               margin: "auto",
               WebkitUserSelect: "none",
               MozUserSelect: "none",
