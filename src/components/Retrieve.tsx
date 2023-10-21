@@ -14,9 +14,8 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
   const [gettingGame, setGettingGame] = useState(false)
   const [assets, setAssets] = useState<{[key: string]: string}>({})
 
-  console.log('ndk',ndk)
-
   const getGame = async () => {
+    if (!ndk) return
     if (gettingGame) return
     setGettingGame(true)
     const id = neventRef.current!.value
@@ -66,7 +65,7 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
         <input ref={neventRef} type="text" placeholder="Event name" />
         <br/>
         <br/>
-        <button className="button" disabled={gettingGame} onClick={getGame}>Play 🕹️</button>
+        <button className="button" disabled={gettingGame || !ndk} onClick={getGame}>Play 🕹️</button>
       </div> }
     </div>
   )

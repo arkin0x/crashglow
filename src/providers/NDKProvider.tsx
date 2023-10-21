@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext } from "react"
 import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk'
 
-type NDKContextType = NDK
+type NDKContextType = NDK | null | undefined
 
 export const NDKContext = createContext<NDKContextType>(null)
 
@@ -10,7 +10,7 @@ type NDKProviderProps = {
 }
 
 export const NDKProvider: React.FC<NDKProviderProps> = ({ children }) => {
-  const [ndk, setNDK] = useState()
+  const [ndk, setNDK] = useState<NDK>()
 
   useEffect(() => {
     const setupNDK = async () => {

@@ -44,7 +44,7 @@ export const publishKind1 = async (ndk: NDK, title: string, content: string, ver
   ndkEvent.tags.push(['subject', title])
   ndkEvent.tags.push(['u', gameid])
   ndkEvent.tags.push(['t','crashglow']) // generic hashtag making it easier to query for games
-  ndkEvent.tags.push(['relays', ...ndk.explicitRelayUrls])
+  ndkEvent.tags.push(['relays', ...ndk.explicitRelayUrls!])
   // TODO: replace domain
   ndkEvent.tags.push(['alt', `This note represents the box of a a web-based video game. Play it at https://crashglow.com/game/${gameid}`])
   ndkEvent.kind = 1
@@ -96,7 +96,7 @@ function createChunkEvent(ndk: NDK, chunk: string, index: number, file: File, re
   const ndkEvent = new NDKEvent(ndk)
   ndkEvent.kind = BLOB
   ndkEvent.content = chunk 
-  ndkEvent.tags.push(['e', referenceID, ndk.explicitRelayUrls[0], "root" ])
+  ndkEvent.tags.push(['e', referenceID, ndk.explicitRelayUrls![0], "root" ])
   ndkEvent.tags.push(['m', file.type])
   ndkEvent.tags.push(['alt', `This is a binary chunk of a web-based video game. Play the full game at https://crashglow.com/play/${nevent}`])
   ndkEvent.tags.push(['index', index.toString()])
@@ -122,23 +122,17 @@ function createChunkEvent(ndk: NDK, chunk: string, index: number, file: File, re
 //   return joinChunks(chunks)
 // }
 
-// Helper function to base64 encode ArrayBuffer
-function base64Encode(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i])
-  }
-  return btoa(binary)
-}
-
 // reassemble game assets from chunks
 export const stitchChunks = (events: Set<NDKEvent>): { [unique: string]: string } => {
   // Group events by hash and mime
   const groups: { [unique: string]: NDKEvent[] } = {}
   for (const event of events) {
-    const hash = event.tags.find(getTag('x'))[1]
-    const mime = event.tags.find(getTag('m'))[1]
+    if (!event) continue
+    const hashTag = event.tags.find(getTag('x'))
+    const mimeTag = event.tags.find(getTag('m'))
+    if (!hashTag || !mimeTag) continue
+    const hash = hashTag[1]
+    const mime = mimeTag[1]
     const unique = `${mime}:${hash}`
     const group = groups[unique] ?? []
     group.push(event)
@@ -147,7 +141,12 @@ export const stitchChunks = (events: Set<NDKEvent>): { [unique: string]: string 
 
   // Sort events within each group by index
   for (const group of Object.values(groups)) {
-    group.sort((a, b) => a.tags.find(getTag('index'))[1] - b.tags.find(getTag('index'))[1])
+    group.sort((a, b) => {
+      const indexTagA = a.tags.find(getTag('index'))
+      const indexTagB = b.tags.find(getTag('index'))
+      if (!indexTagA || !indexTagB) return 0
+      return Number(indexTagA[1]) - Number(indexTagB[1])
+    })
   }
 
   // Stitch chunks together within each group
@@ -157,26 +156,5 @@ export const stitchChunks = (events: Set<NDKEvent>): { [unique: string]: string 
     result[unique] = chunks.join('')
   }
 
-  return result
-}
-
-// Helper function to base64 decode string
-function base64Decode(str: string): Uint8Array {
-  const binary = atob(str)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i)
-  }
-  return bytes
-}
-
-function joinChunks(chunks: Uint8Array[]): Uint8Array {
-  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
-  const result = new Uint8Array(totalLength)
-  let offset = 0
-  for (const chunk of chunks) {
-    result.set(chunk, offset)
-    offset += chunk.length
-  }
   return result
 }

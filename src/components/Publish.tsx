@@ -74,8 +74,8 @@ export const Publish = () => {
 
 
   const publish = async () => {
-    if (ndk === null) return
-    if (upload === null) return
+    if (!ndk) return
+    if (!upload) return
 
     // publish kind1, get id
     const kind1 = await publishKind1(ndk, title, content, version, uuid, upload)
