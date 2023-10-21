@@ -14,10 +14,10 @@ export const NDKProvider: React.FC<NDKProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const setupNDK = async () => {
-      while (!window.nostr) {
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
-      const signer = new NDKNip07Signer()
+      // while (!window.nostr) {
+      //   await new Promise((resolve) => setTimeout(resolve, 100))
+      // }
+      const signer = new NDKNip07Signer(3000)
       const ndkRef = new NDK({
         signer,
         explicitRelayUrls: ["wss://dashglow-test.nostr1.com"]//,"wss://relay.damus.io"]
