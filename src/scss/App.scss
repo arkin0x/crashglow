@@ -97,7 +97,7 @@ html, body {
 }
 
 .primary {
-  min-height: calc(calc($header-height + $footer-height) + 80vh);
+  min-height: 100svh;
   // height: 100svh;
   padding-top: 0svh;
   // transform: translateY(-10svh);
@@ -107,12 +107,12 @@ html, body {
 
 .layout {
   min-height: 100svh;
-  padding: $header-height 1rem;
+  padding: calc($header-height + 2svh) 1rem;
   backdrop-filter: blur(5px);
 }
 .game-layout {
-  padding-top: 40%;
-  // margin: auto;
+  @extend .layout;
+  padding: $header-height 0 0 0;
 }
 
 h2 {

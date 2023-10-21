@@ -78,20 +78,17 @@ export const Publish = () => {
     if (upload === null) return
 
     // publish kind1, get id
-    const kind1 = await publishKind1(ndk, title, content, version, uuid)
+    const kind1 = await publishKind1(ndk, title, content, version, uuid, upload)
 
     for (const file of upload) {
+      console.log(file)
       const reader = new FileReader()
       reader.readAsDataURL(file)
-      if (reader.result !== null) {
-        reader.onload = async () => {
-          const base64 = (reader.result! as string).split(',')[1]
-          const nevent = await publishGame(ndk, base64, file, kind1)
-          console.log('published', nevent)
-          // navigate(`/play/${nevent}`)
-        }
-      } else {
-        alert('Error: uploaded file could not be read')
+      reader.onload = async () => {
+        const base64 = (reader.result! as string).split(',')[1]
+        const nevent = await publishGame(ndk, base64, file, kind1)
+        console.log('published', nevent)
+        // navigate(`/play/${nevent}`)
       }
     }
   }
@@ -133,9 +130,6 @@ export const Publish = () => {
           <input className="glass-input input-title" required id="game-title" ref={titleRef} placeholder="Enter game title" onChange={handleTitleChange} />
           <input className="glass-input" id="game-uuid" ref={uuidRef} placeholder="If you're updating your game, you must enter its UUID!" onChange={handleUuidChange} />
           <input className="glass-input" required id="game-version" ref={versionRef} placeholder="Enter game version (semver), e.g. 0.1.0" onChange={handleVersionChange} />
-          {/* TODO: image upload for game box art */}
-          <br/>
-          <br/>
           <textarea className="glass-input" ref={contentRef} placeholder="Enter game description + instructions" onChange={handleContentChange} />
         </div>
         <br/>

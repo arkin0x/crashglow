@@ -1015,7 +1015,7 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
 
         <div
           id="p8_container"
-          style={{ margin: "auto", display: "table", width: "100%", height: "100%" }}
+          style={{ margin: "auto", width: "100%", height: "100%" }}
           onClick={() => {
             myWindow.p8_create_audio_context();
             myWindow.p8_run_cart();

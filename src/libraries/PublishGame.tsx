@@ -5,6 +5,7 @@ import { nip19 } from 'nostr-tools'
 import { sha256 } from '@noble/hashes/sha256'
 import { bytesToHex } from "@noble/hashes/utils"
 import { getTag } from './utils';
+import { nostrBuildUploadImage } from './nostr-build';
 
 type NDKType = typeof NDK
 
@@ -31,14 +32,16 @@ export const publishGame = async (ndk: NDKType, base64: string, file: File, kind
   return nevent
 }
 
-export const publishKind1 = async (ndk: NDKType, title: string, content: string, version: string, gameuuid: string) => {
+export const publishKind1 = async (ndk: NDKType, title: string, content: string, version: string, gameuuid: string, upload: FileList) => {
   const uuid = gameuuid || uuidv4();
   const semver = version || "0.1.0"
   const gameid = `${uuid}:${semver}`
   const ndkEvent = new NDKEvent(ndk)
 
   // TODO: nostr.build API to upload box art
-  const boxart = 'https://crashglow.com/boxart.png'
+  const boxart = Array.from(upload).filter(file => ['image/png', 'image/jpeg', 'image/gif'].includes(file.type))[0]
+
+  const {url: boxartURL} = await nostrBuildUploadImage(boxart)
 
   ndkEvent.tags.push(['subject', title])
   ndkEvent.tags.push(['u', gameid])
@@ -47,7 +50,7 @@ export const publishKind1 = async (ndk: NDKType, title: string, content: string,
   // TODO: replace domain
   ndkEvent.tags.push(['alt', `This note represents the box of a a web-based video game. Play it at https://crashglow.com/game/${gameid}`])
   ndkEvent.kind = 1
-  ndkEvent.content = `${boxart}\n${content}\n\n${title}, ${semver}\nPlay now at https://crashglow.com/game/${gameid}`
+  ndkEvent.content = `${boxartURL}\n${content}\n\n${title}, ${semver}\nPlay now at https://crashglow.com/game/${gameid}`
 
   console.log('publishing kind1...')
   const res = await ndkEvent.publish()
