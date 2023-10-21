@@ -462,10 +462,10 @@
     nostr-tools "^1.7.5"
     websocket-polyfill "^0.0.3"
 
-"@nostr-dev-kit/ndk@^1.3.2":
-  version "1.3.2"
-  resolved "https://registry.npmjs.org/@nostr-dev-kit/ndk/-/ndk-1.3.2.tgz"
-  integrity sha512-8uXYGQWiYJE4nbd+dSOuFwLR55mRSkhCaxwBLhM7TBakz/bj0AcvhISgD3NxwVzPH/xLns0tyb17K3xoxODURQ==
+"@nostr-dev-kit/ndk@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@nostr-dev-kit/ndk/-/ndk-2.0.3.tgz#b01e2e29f508095814cb82275e98b0d1887ea72c"
+  integrity sha512-rKIJBIU0dZHaXwj1TY18VSLYsoIe1aQ7TAxkH3WFx3lGTXCz+nlGh5bsyvgMBdbyb0iecdjsaKqBRpEWMzYC9g==
   dependencies:
     "@noble/hashes" "^1.3.1"
     "@noble/secp256k1" "^2.0.0"

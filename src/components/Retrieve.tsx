@@ -1,5 +1,6 @@
 import { useRef, useState, useContext } from 'react'
 import { nip19 } from 'nostr-tools'
+import { NDKFilter } from '@nostr-dev-kit/ndk'
 import { NDKContext } from '../providers/NDKProvider'
 import { canDecode, isHex } from '../libraries/utils'
 import { BLOB, stitchChunks } from '../libraries/PublishGame'
@@ -21,7 +22,7 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
     const id = neventRef.current!.value
     let decoded
     if (canDecode(id)) {
-      decoded = nip19.decode(id).data.id
+      decoded = ((nip19.decode(id) as nip19.DecodeResult).data as nip19.EventPointer).id
     } else if (isHex(id)) {
       decoded = id
     } else {
@@ -29,7 +30,9 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
       setGettingGame(false)
       return
     }
-    const assetChunks = await ndk.fetchEvents({ "#e": [decoded], "kinds": [BLOB] })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filter: NDKFilter = { "#e": [decoded], "kinds": [BLOB as any] }
+    const assetChunks = await ndk.fetchEvents(filter)
     setGettingGame(false)
     const assets = stitchChunks(assetChunks)
     console.log('stitched game assets',assets)

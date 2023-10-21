@@ -7,8 +7,6 @@ import { bytesToHex } from "@noble/hashes/utils"
 import { getTag } from './utils';
 import { nostrBuildUploadImage } from './nostr-build';
 
-type NDKType = typeof NDK
-
 // kinds
 export const BLOB = 5391
 export const HTML = 5392
@@ -17,7 +15,7 @@ export const JS = 5394
 
 const CHUNK_SIZE = 100 * 1024 // 100KB
 
-export const publishGame = async (ndk: NDKType, base64: string, file: File, kind1: NDKEvent) => {
+export const publishGame = async (ndk: NDK, base64: string, file: File, kind1: NDKEvent) => {
 
   // obtain the nevent for the game so the chunks can reference it.
   const nevent = await nip19.neventEncode({
@@ -32,7 +30,7 @@ export const publishGame = async (ndk: NDKType, base64: string, file: File, kind
   return nevent
 }
 
-export const publishKind1 = async (ndk: NDKType, title: string, content: string, version: string, gameuuid: string, upload: FileList) => {
+export const publishKind1 = async (ndk: NDK, title: string, content: string, version: string, gameuuid: string, upload: FileList) => {
   const uuid = gameuuid || uuidv4();
   const semver = version || "0.1.0"
   const gameid = `${uuid}:${semver}`
@@ -60,7 +58,7 @@ export const publishKind1 = async (ndk: NDKType, title: string, content: string,
 }
 
 // Send a large payload in chunks
-export async function sendPayload(ndk: NDKType, base64: string, file: File, referenceID: string, nevent: string) {
+export async function sendPayload(ndk: NDK, base64: string, file: File, referenceID: string, nevent: string) {
   const chunks = chunkPayload(base64)
   
   // get the hash of the file; this serves as an identifier for the file
@@ -92,7 +90,7 @@ function chunkPayload(base64:string): string[] {
 }
 
 // Create a Nostr event to send a chunk
-function createChunkEvent(ndk: NDKType, chunk: string, index: number, file: File, referenceID: string, nevent: string, hash: string): NDKEvent {
+function createChunkEvent(ndk: NDK, chunk: string, index: number, file: File, referenceID: string, nevent: string, hash: string): NDKEvent {
   // Convert chunk to base64 string
 
   const ndkEvent = new NDKEvent(ndk)

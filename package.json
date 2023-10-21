@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@nostr-connect/nostr-reqres": "^0.1.2",
-    "@nostr-dev-kit/ndk": "^1.3.2",
+    "@nostr-dev-kit/ndk": "^2.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0",

@@ -1,18 +1,18 @@
-import { useState, useContext, useEffect, useRef } from 'react'
+import { useState, useContext, useRef } from 'react'
 import { publishGame, publishKind1 } from '../libraries/PublishGame'
 import { NDKContext } from '../providers/NDKProvider'
 import '../scss/Publish.scss'
-import { NostrWindow } from '../types/NostrWindow'
+// import { NostrWindow } from '../types/NostrWindow'
 
 const PUBLISH_BUTTON_TEXT = "Publish ✨"
 
 // This declaration allows us to access window.nostr without TS errors.
 // https://stackoverflow.com/a/47130953
-declare global {
-    interface Window {
-        nostr: NostrWindow;
-    }
-}
+// declare global {
+//     interface Window {
+//         nostr: NostrWindow;
+//     }
+// }
 
 export const Publish = () => {
   const [upload, setUpload] = useState<FileList | null>(null)
