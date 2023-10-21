@@ -1,4 +1,4 @@
-import { useRef, useState, useContext } from 'react'
+import { useRef, useState, useContext, useEffect } from 'react'
 import { nip19 } from 'nostr-tools'
 import { NDKFilter } from '@nostr-dev-kit/ndk'
 import { NDKContext } from '../providers/NDKProvider'
@@ -8,11 +8,32 @@ import Pico8Game from './Pico8Game'
 
 // TODO: support NIP19 nevents as well as hex
 
-export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction<boolean>>}> = ({ setPlaying }) => {
+export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction<boolean>>, uuid?: string}> = ({ setPlaying, uuid }) => {
   const ndk = useContext(NDKContext)
   const neventRef = useRef<HTMLInputElement>(null)
   const [gettingGame, setGettingGame] = useState(false)
   const [assets, setAssets] = useState<{[key: string]: string}>({})
+
+  useEffect(() => {
+    // TODO: validate that the uuid is properly formatted
+    // fetch the game by uuid
+    const fetchGame = async () => {
+      if (!ndk) return
+      if (!uuid) return
+      const gameFilter: NDKFilter = { "#u": [uuid], "kinds": [1] }
+      const game = await ndk.fetchEvent(gameFilter)
+      if (!game) {
+        console.log('Game not found')
+        return
+      } 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const chunkFilter: NDKFilter = { "#e": [game.id], "kinds": [BLOB as any] }
+      const assetChunks = await ndk.fetchEvents(chunkFilter)
+      const assets = stitchChunks(assetChunks)
+      setAssets(assets)
+    }
+    fetchGame()
+  }, [uuid])
 
   const getGame = async () => {
     if (!ndk) return
@@ -56,17 +77,25 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
 
   return (
     <div id="component-retrieve" className="primary">
-      { Object.keys(assets).length > 0 ? 
-      <div className="game-layout">{loadGame()}</div> : 
-      <div className="layout">
-        <h2>Load a Game</h2>
-        <label htmlFor="nevent">Enter game nevent:</label><br/>
-        <br/>
-        <input ref={neventRef} type="text" placeholder="Event name" />
-        <br/>
-        <br/>
-        <button className="button" disabled={gettingGame || !ndk} onClick={getGame}>Play 🕹️</button>
-      </div> }
+      { 
+      Object.keys(assets).length > 0 
+      ? 
+        <div className="game-layout">{loadGame()}</div> 
+      : 
+        uuid 
+        ? 
+          <h2>Loading...</h2> 
+        :
+          <div className="layout">
+            <h2>Load a Game</h2>
+            <label htmlFor="nevent">Enter game nevent:</label><br/>
+            <br/>
+            <input ref={neventRef} type="text" placeholder="Event name" />
+            <br/>
+            <br/>
+            <button className="button" disabled={gettingGame || !ndk} onClick={getGame}>Play 🕹️</button>
+          </div>
+      }
     </div>
   )
 }

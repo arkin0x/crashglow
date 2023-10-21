@@ -4,6 +4,7 @@ import { NDKContext } from '../providers/NDKProvider'
 import { Publish } from './Publish'
 
 export const Home = () => {
+  const [showGames, setShowGames] = useState<boolean>(true)
   const ndk = useContext(NDKContext)
   const [games, setGames] = useState<NDKEvent[]>([])
 
@@ -33,9 +34,8 @@ export const Home = () => {
   return (
     <div id="component-home" className="primary">
       <div className="layout">
-        <h2>Games</h2>
-        { latestGames() }
-        <Publish/>
+        { showGames ?  <><h2>Games</h2>{latestGames()}</> : null }
+        <Publish setShowGames={setShowGames}/>
       </div>
     </div>
   )

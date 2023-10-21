@@ -14,7 +14,7 @@ const PUBLISH_BUTTON_TEXT = "Publish ✨"
 //     }
 // }
 
-export const Publish = () => {
+export const Publish: React.FC<{setShowGames: React.Dispatch<React.SetStateAction<boolean>>}> = ({setShowGames}) => {
   const [upload, setUpload] = useState<FileList | null>(null)
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')
@@ -76,6 +76,8 @@ export const Publish = () => {
   const publish = async () => {
     if (!ndk) return
     if (!upload) return
+
+    setShowGames(false)
 
     // publish kind1, get id
     const kind1 = await publishKind1(ndk, title, content, version, uuid, upload)
