@@ -112,8 +112,6 @@ export const Publish = () => {
     return true
   }
 
-  console.log('ready?',readyToPublish())
-
   return (
     <>
       <h2>Publish a game</h2>
