@@ -74,18 +74,13 @@ export const Publish = () => {
 
 
   const publish = async () => {
-    console.log('call to publish')
     if (ndk === null) return
-    if (uploadRef.current?.files === null) return
-    if (contentRef.current?.value === null) return
-    if (titleRef.current?.value === null) return
-
-    console.log(uploadRef.current!.files)
+    if (upload === null) return
 
     // publish kind1, get id
-    const kind1 = await publishKind1(ndk, titleRef.current!.value, contentRef.current!.value)
+    const kind1 = await publishKind1(ndk, title, content, version, uuid)
 
-    for (const file of uploadRef.current!.files) {
+    for (const file of upload) {
       const reader = new FileReader()
       reader.readAsDataURL(file)
       if (reader.result !== null) {
@@ -102,14 +97,15 @@ export const Publish = () => {
   }
 
   const readyToPublish = (): boolean => {
-    const ready = (
-      upload?.length === 2 &&
-      title &&
-      content &&
-      version
-    )
-    if (ready) return false // "disabled" is false
-    return true
+    if (upload === null) return true
+    if (upload.length !== 2) return true
+    // check if upload contains a JS file and an image
+    if (!Array.from(upload).some(file => file.type === 'text/javascript')) return true
+    if (!Array.from(upload).some(file => ['image/png', 'image/jpeg', 'image/gif'].includes(file.type))) return true
+    if (title === '') return true
+    if (content === '') return true
+    if (version === '') return true
+    return false
   }
 
   return (

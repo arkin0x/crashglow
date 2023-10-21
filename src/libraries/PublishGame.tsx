@@ -18,6 +18,7 @@ const CHUNK_SIZE = 100 * 1024 // 100KB
 
 export const publishGame = async (ndk: NDKType, base64: string, file: File, kind1: NDKEvent) => {
 
+  // obtain the nevent for the game so the chunks can reference it.
   const nevent = await nip19.neventEncode({
     id: kind1.id,
     relays: ndk.explicitRelayUrls,
@@ -30,19 +31,24 @@ export const publishGame = async (ndk: NDKType, base64: string, file: File, kind
   return nevent
 }
 
-export const publishKind1 = async (ndk: NDKType, title: string, content: string) => {
-  const uuid = uuidv4();
-  // TODO: get semver from user input
-  const semver = "0.1.0"
+export const publishKind1 = async (ndk: NDKType, title: string, content: string, version: string, gameuuid: string) => {
+  const uuid = gameuuid || uuidv4();
+  const semver = version || "0.1.0"
+  const gameid = `${uuid}:${semver}`
   const ndkEvent = new NDKEvent(ndk)
+
+  // TODO: nostr.build API to upload box art
+  const boxart = 'https://crashglow.com/boxart.png'
+
   ndkEvent.tags.push(['subject', title])
-  ndkEvent.tags.push(['u', `${uuid}:${semver}`])
-  ndkEvent.tags.push(['t','crashglow'])
+  ndkEvent.tags.push(['u', gameid])
+  ndkEvent.tags.push(['t','crashglow']) // generic hashtag making it easier to query for games
   ndkEvent.tags.push(['relays', ...ndk.explicitRelayUrls])
   // TODO: replace domain
-  ndkEvent.tags.push(['alt', `This note represents the box of a a web-based video game. Play it at https://domain.com/game/${uuid}:${semver}`])
+  ndkEvent.tags.push(['alt', `This note represents the box of a a web-based video game. Play it at https://crashglow.com/game/${gameid}`])
   ndkEvent.kind = 1
-  ndkEvent.content = content
+  ndkEvent.content = `${boxart}\n${content}\n\n${title}, ${semver}\nPlay now at https://crashglow.com/game/${gameid}`
+
   console.log('publishing kind1...')
   const res = await ndkEvent.publish()
   // res is relay info, not event. just inspect the same event object.
