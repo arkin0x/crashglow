@@ -97,7 +97,7 @@ html, body {
 }
 
 .primary {
-  min-height: 100svh;
+  min-height: calc(calc($header-height + $footer-height) + 80vh);
   // height: 100svh;
   padding-top: 0svh;
   // transform: translateY(-10svh);
@@ -209,4 +209,8 @@ textarea, input {
   &::placeholder {
     color: $text-color;
   }
+}
+
+#logo {
+  cursor: pointer;
 }

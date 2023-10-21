@@ -69,6 +69,7 @@ interface CustomWindow extends Window {
     menu_button: number | boolean;
     any_button: number | boolean;
   };
+  custom_p8_override_footer: () => void;
 }
 
 interface CustomDocument extends Document {
@@ -113,7 +114,7 @@ const initializeWindow = () => {
   myWindow.p8_touch_detected = false;
 }
 
-export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
+export const Pico8Game = ({ gameJS, setPlaying }: { gameJS: string, setPlaying: React.Dispatch<React.SetStateAction<boolean>> }) => {
 
   useEffect(() => {
 
@@ -134,6 +135,10 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
       },
       { passive: false }
     );
+
+    myWindow.custom_p8_override_footer = () => {
+      setPlaying(true)
+    }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -1019,6 +1024,8 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
           onClick={() => {
             myWindow.p8_create_audio_context();
             myWindow.p8_run_cart();
+            myWindow.p8_update_layout();
+            myWindow.custom_p8_override_footer();
           }}
         >
           <div
@@ -1058,7 +1065,7 @@ export const Pico8Game = ({ gameJS }: { gameJS: string }) => {
                 height: "100vh",
               }}
             >
-              &nbsp
+              &nbsp;
             </div>
 
             <div style={{ display: "flex", position: "relative", height: "100%", width: "100%" }}>

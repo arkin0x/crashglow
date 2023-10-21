@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { Home } from './Home'
 import { Publish } from './Publish'
@@ -8,6 +9,7 @@ import { Retrieve } from './Retrieve'
 import { Header } from './Header'
 
 export const App = () => {
+  const [playing, setPlaying] = useState(false)
   return (
     <>
     <div id="app">
@@ -16,10 +18,10 @@ export const App = () => {
           <Header/>
           <Routes>
             <Route path="/" element={<Home/>}/>
-            <Route path="/load" element={<Retrieve/>}/>
+            <Route path="/load" element={<Retrieve setPlaying={setPlaying} />}/>
             <Route path="/publish" element={<Publish/>} />
           </Routes>
-          <Footer/>
+          { playing ? null : <Footer/> }
         </Router>
       </NDKProvider>
     </div>

@@ -11,7 +11,7 @@ export const Header = () => {
 
   return (
     <header id="header">
-      <img id="logo" className="flex-across" src={logo} alt="logo" onClick={() => go('/')} />
+      <img id="logo" className="flex-across" src={logo} alt="logo" onClick={() => window.location.href='/'} />
       <h1 id="app-name" className="flex-across" onClick={() => go('/')}>Crash Glow</h1>
     </header>
   )

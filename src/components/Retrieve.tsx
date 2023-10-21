@@ -7,7 +7,7 @@ import Pico8Game from './Pico8Game'
 
 // TODO: support NIP19 nevents as well as hex
 
-export const Retrieve = () => {
+export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction<boolean>>}> = ({ setPlaying }) => {
   const ndk = useContext(NDKContext)
   const neventRef = useRef<HTMLInputElement>(null)
   const [gettingGame, setGettingGame] = useState(false)
@@ -49,7 +49,7 @@ export const Retrieve = () => {
         js = value
       }
     }
-    return <Pico8Game gameJS={js} />
+    return <Pico8Game gameJS={js} setPlaying={setPlaying}/>
   }
 
   return (
@@ -64,10 +64,6 @@ export const Retrieve = () => {
         <br/>
         <br/>
         <button className="button" disabled={gettingGame} onClick={getGame}>Play 🕹️</button>
-        <div id="play-frame">
-          <br/>
-          { loadGame() }
-        </div>
       </div> }
     </div>
   )
