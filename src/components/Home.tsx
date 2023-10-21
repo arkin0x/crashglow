@@ -12,22 +12,22 @@ export const Home = () => {
     const fetchLatestGames = async () => {
       const loaded = await ndk.fetchEvents({ kinds: [1], limit: 10, "#t": ["crashglow"] })
       setGames(Array.from(loaded))
-      console.log(loaded)
     }
     fetchLatestGames()
   }, [ndk])
 
   const latestGames = () => {
     const latest = games.map((game) => {
+      if (!game.content) return null
       return (
-        <div key={game.id}>
-          <h3>{game.tags.find((tag) => tag[0] === 'subject')![1]}</h3>
-          <p>{game.content}</p>
+        <div key={game.id} className="game-card">
+          <h3 className="game-card-title">{game.tags.find((tag) => tag[0] === 'subject')![1]}</h3>
+          <img className="game-card-preview" src={game.content.split('\n')[0]}/>
         </div>
       )
     })
-    console.log(latest)
     if (latest.length === 0) return <p>No games found! 😿</p>
+    return latest
   }
 
   return (

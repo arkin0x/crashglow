@@ -214,3 +214,17 @@ textarea, input {
 #logo {
   cursor: pointer;
 }
+
+.game-card {
+  background-color: $white-glass;
+  padding: 1rem;
+  margin: 2rem 0;
+}
+
+.game-card-preview {
+  width: 100%;
+}
+
+.game-card-title {
+  margin: 0 0 1rem 0;
+}

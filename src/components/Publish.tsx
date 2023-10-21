@@ -128,9 +128,9 @@ export const Publish = () => {
           <br/>
           <br/>
           <input className="glass-input input-title" required id="game-title" ref={titleRef} placeholder="Enter game title" onChange={handleTitleChange} />
-          <input className="glass-input" id="game-uuid" ref={uuidRef} placeholder="If you're updating your game, you must enter its UUID!" onChange={handleUuidChange} />
-          <input className="glass-input" required id="game-version" ref={versionRef} placeholder="Enter game version (semver), e.g. 0.1.0" onChange={handleVersionChange} />
-          <textarea className="glass-input" ref={contentRef} placeholder="Enter game description + instructions" onChange={handleContentChange} />
+          <input className="glass-input" id="game-uuid" ref={uuidRef} placeholder="UUID (if updating)" onChange={handleUuidChange} />
+          <input className="glass-input" required id="game-version" ref={versionRef} placeholder="Version (0.1.0)" onChange={handleVersionChange} />
+          <textarea className="glass-input" ref={contentRef} placeholder="Description + instructions" onChange={handleContentChange} />
         </div>
         <br/>
         <button className="button" disabled={readyToPublish()} onClick={publish}>Publish 🚀</button>
