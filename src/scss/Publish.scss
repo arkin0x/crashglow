@@ -1,8 +1,14 @@
-#game-title {
+.glass-input {
+  // background: #3336;
   background: transparent;
   backdrop-filter: none;
   font-family: 'Dela Gothic One', sans-serif;
+  margin-bottom: 1rem;
   width: 100%;
+}
+
+.input-title {
+  font-size: 2rem;
 }
 
 textarea {
@@ -10,7 +16,7 @@ textarea {
   backdrop-filter: none;
   font-family: inherit;
   width: 100%;
-  height: 5rem;
+  height: 8rem;
   border-radius: 8px;
   border: 1px solid transparent;
   font-size: 1em;

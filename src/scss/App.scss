@@ -37,7 +37,6 @@ html, body {
 }
 
 #root {
-  max-width: 1280px;
   margin: 0 auto;
   // text-align: center;
 }
@@ -192,6 +191,10 @@ ul, li {
   background-color: $green; 
   cursor: pointer;
   transition: border-color 0.25s;
+  &:disabled {
+    background-color: #7777;
+    border: 2px solid red;
+  }
 }
 .button:hover {
   border-color: #646cff;

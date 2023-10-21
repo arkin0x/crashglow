@@ -12,6 +12,7 @@ export const Home = () => {
     const fetchLatestGames = async () => {
       const loaded = await ndk.fetchEvents({ kinds: [1], limit: 10, "#t": ["crashglow"] })
       setGames(Array.from(loaded))
+      console.log(loaded)
     }
     fetchLatestGames()
   }, [ndk])
@@ -25,6 +26,7 @@ export const Home = () => {
         </div>
       )
     })
+    console.log(latest)
     if (latest.length === 0) return <p>No games found! 😿</p>
   }
 
