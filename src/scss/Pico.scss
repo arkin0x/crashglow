@@ -97,11 +97,11 @@ canvas {
 #controls_left_panel {
   width: 50vw;
   left: 0;
-  bottom: 0;
+  top: calc(10svh + 100svw);
 }
 
 #controls_right_panel {
   width: 50vw;
   right: 0;
-  bottom: 0;
+  top: calc(10svh + 100svw);
 }
