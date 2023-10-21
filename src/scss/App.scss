@@ -106,7 +106,7 @@ html, body {
 }
 
 .layout {
-  max-width: 400px;
+  min-width: 300px;
   min-height: 100svh;
   padding: calc($header-height + 2svh) 1rem;
   backdrop-filter: blur(5px);
