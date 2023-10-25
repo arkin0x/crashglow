@@ -2,7 +2,7 @@
 
 Crash glow is the first nostr-native gaming client. The ultimate vision for this project is to combine web gaming with nostr's social layer enabling profiles, purchasing, sharing, and more. Currently, Crash Glow supports games made with pico-8: https://www.lexaloffle.com/pico-8.php
 
-Entrant to the 2023 BoltFun Nostrasia Hackathon: https://bolt.fun/project/Satoshi_Arcade
+Entrant to the 2023 BoltFun Nostrasia Hackathon: https://bolt.fun/project/Crash_Glow
 
 # React + TypeScript + Vite
 
