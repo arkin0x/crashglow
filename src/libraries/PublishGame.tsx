@@ -31,9 +31,10 @@ export const publishGame = async (ndk: NDK, base64: string, file: File, kind1: N
 }
 
 export const publishKind1 = async (ndk: NDK, title: string, content: string, version: string, gameuuid: string, upload: FileList) => {
-  const uuid = gameuuid || uuidv4();
+  const uuid = gameuuid || uuidv4()
   const semver = version || "0.1.0"
-  const gameid = `${uuid}_${semver}`
+  // const gameid = `${uuid}_${semver}`
+  const gameid = uuid
   const ndkEvent = new NDKEvent(ndk)
 
   // TODO: nostr.build API to upload box art
@@ -42,7 +43,7 @@ export const publishKind1 = async (ndk: NDK, title: string, content: string, ver
   const {url: boxartURL} = await nostrBuildUploadImage(boxart)
 
   ndkEvent.tags.push(['subject', title])
-  ndkEvent.tags.push(['u', gameid])
+  ndkEvent.tags.push(['u', gameid, semver])
   ndkEvent.tags.push(['t','crashglow']) // generic hashtag making it easier to query for games
   ndkEvent.tags.push(['relays', ...ndk.explicitRelayUrls!])
   // TODO: replace domain

@@ -14,7 +14,7 @@ const PUBLISH_BUTTON_TEXT = "Publish ✨"
 //     }
 // }
 
-export const Publish: React.FC<{setShowGames: React.Dispatch<React.SetStateAction<boolean>>}> = ({setShowGames}) => {
+export const Publish: React.FC = () => {
   const [upload, setUpload] = useState<FileList | null>(null)
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')

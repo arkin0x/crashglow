@@ -25,7 +25,8 @@ export const Home = () => {
   const latestGames = () => {
     const latest = games.map((game) => {
       if (isTest(game)) return null
-      const version = game.tags.find((tag) => tag[0] === 'u')![1].split('_')[1]
+      const u = game.tags.find((tag) => tag[0] === 'u')
+      const version = u![1].split('_')[1] || u![1].split(':')[1] || u![2] || '0.1.0?'
       if (!game.content) return null
       if (game.content === 'test') return null
       return (
