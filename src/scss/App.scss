@@ -219,7 +219,8 @@ textarea, input {
 .game-card {
   background-color: $white-glass;
   padding: 1rem;
-  margin: 2rem 0;
+  margin: 2rem auto;
+  max-width: 400px;
 }
 
 .game-card-preview {

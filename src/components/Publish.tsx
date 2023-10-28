@@ -29,6 +29,7 @@ export const Publish: React.FC<{setShowGames: React.Dispatch<React.SetStateActio
   const ndk = useContext(NDKContext)
   const [extensionReady, setExtensionReady] = useState<boolean | null>(false)
   const [publishButton, setPublishButton] = useState<string>(PUBLISH_BUTTON_TEXT)
+  const [newlyPublished, setNewlyPublished] = useState<string|null>(null)
 
   const activatePlugin = async () => {
     if (extensionReady === false ) {
@@ -90,6 +91,7 @@ export const Publish: React.FC<{setShowGames: React.Dispatch<React.SetStateActio
         const base64 = (reader.result! as string).split(',')[1]
         const nevent = await publishGame(ndk, base64, file, kind1)
         console.log('published', nevent)
+        setNewlyPublished(nevent)
         // navigate(`/play/${nevent}`)
       }
     }
@@ -135,7 +137,8 @@ export const Publish: React.FC<{setShowGames: React.Dispatch<React.SetStateActio
           <textarea className="glass-input" ref={contentRef} placeholder="Description + instructions" onChange={handleContentChange} />
         </div>
         <br/>
-        <button className="button" disabled={readyToPublish()} onClick={publish}>Publish 🚀</button>
+        { !newlyPublished ? <button className="button" disabled={readyToPublish()} onClick={publish}>Publish 🚀</button> : null }
+        { newlyPublished ? <><h3>Published!</h3><p><button className="button" onClick={ () => {window.location.href = `/play/${newlyPublished}`}}>Play it now 👾</button></p></> : null }
       </>
       : <button className="button" type="button" onClick={activatePlugin}>{publishButton}</button> }
     <br/>
