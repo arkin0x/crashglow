@@ -91,7 +91,7 @@ export const Publish: React.FC<{setShowGames: React.Dispatch<React.SetStateActio
         const base64 = (reader.result! as string).split(',')[1]
         const nevent = await publishGame(ndk, base64, file, kind1)
         console.log('published', nevent)
-        setNewlyPublished(nevent)
+        setNewlyPublished(kind1.id)
         // navigate(`/play/${nevent}`)
       }
     }

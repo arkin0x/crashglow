@@ -34,7 +34,7 @@ export const Home = () => {
           <img className="game-card-preview" src={game.content.split('\n')[0]}/>
           <br/>
           <br/>
-          <button className="button">Play 👾</button>
+          <button className="button" onClick={() => {window.location.href=`/play/${game.id}`}}>Play 👾</button>
         </div>
       )
     })
