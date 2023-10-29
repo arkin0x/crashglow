@@ -55,7 +55,7 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
   }
 
   const getGameByUUID = async (uuid: string) => {
-    console.log('fetching game by uuid', uuid)
+    if (!ndk) return
     const gameFilter: NDKFilter = { "#u": [uuid], "kinds": [1] }
     const games = Array.from(await ndk.fetchEvents(gameFilter))
     if (games.length === 0) {

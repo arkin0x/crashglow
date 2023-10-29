@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { Home } from './Home'
 import { Publish } from './Publish'
@@ -9,12 +9,16 @@ import { Retrieve } from './Retrieve'
 import { Header } from './Header'
 import { Game } from './Game'
 
-if (window.nostr){
-  await window.nostr.getPublicKey()
-}
-
 export const App = () => {
   const [playing, setPlaying] = useState(false)
+  useEffect(() => {
+    const connect = async () => {
+      if (window.nostr){
+        await window.nostr.getPublicKey()
+      }
+    }
+    connect()
+  },[])
   return (
     <>
     <div id="app">

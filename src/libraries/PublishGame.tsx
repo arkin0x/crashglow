@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk'
 import { v4 as uuidv4 } from 'uuid';
 // import { html, js } from '../assets/ExampleGameHTMLJS.ts'

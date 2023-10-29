@@ -987,6 +987,7 @@ export const Pico8Game = ({ gameJS, setPlaying }: { gameJS: string, setPlaying: 
       // probably just refresh the page... but when?
       initializeWindow();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameJS]);
 
   return (
