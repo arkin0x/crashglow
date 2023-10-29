@@ -8,6 +8,11 @@ export const isHex = (identifier: string) => {
   return hexRegex.test(identifier)
 }
 
+export const isUUIDv4 = (identifier: string) => {
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
+  return uuidRegex.test(identifier)
+}
+
 // use this like event.tags.find(getTag('e'))[1] to get the value of the e tag
 type FindTag = (tag: string[]) => boolean;
 export const getTag = (key: string): FindTag => {

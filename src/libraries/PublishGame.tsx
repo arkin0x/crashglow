@@ -49,7 +49,7 @@ export const publishKind1 = async (ndk: NDK, title: string, content: string, ver
   // TODO: replace domain
   ndkEvent.tags.push(['alt', `This note represents the box of a a web-based video game. Play it at https://crashglow.com/game/${gameid}`])
   ndkEvent.kind = 1
-  ndkEvent.content = `${boxartURL}\n${content}\n\n${title}, ${semver}\nPlay now at https://crashglow.com/game/${gameid}`
+  ndkEvent.content = `${boxartURL}\n${content}\n\n${title}, ${semver}\nPlay now at https://crashglow.com/game/${gameid}\n#crashglow #gamedev #webgame #arcade`
 
   console.log('publishing kind1...')
   const res = await ndkEvent.publish()

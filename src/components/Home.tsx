@@ -2,6 +2,7 @@ import { useEffect, useContext, useState } from 'react'
 import { NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKContext } from '../providers/NDKProvider'
 import { Publish } from './Publish'
+import { useNavigate } from 'react-router-dom'
 
 const isTest = (game: NDKEvent) => {
   const findTest = game.tags.find((tag: string[]) => tag[0] === 'subject')![1].toLowerCase().includes('test') || game.content.includes('test')
@@ -9,6 +10,7 @@ const isTest = (game: NDKEvent) => {
 }
 
 export const Home = () => {
+  const navigate = useNavigate()
   const [showGames, setShowGames] = useState<boolean>(true)
   const ndk = useContext(NDKContext)
   const [games, setGames] = useState<NDKEvent[]>([])
@@ -36,7 +38,7 @@ export const Home = () => {
           <img className="game-card-preview" src={game.content.split('\n')[0]}/>
           <br/>
           <br/>
-          <button className="button" onClick={() => {window.location.href=`/game/${game.id}`}}>Play 👾</button>
+          <button className="button" onClick={() => {navigate(`/game/${game.id}`)}}>Play 👾</button>
         </div>
       )
     })

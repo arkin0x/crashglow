@@ -1079,7 +1079,6 @@ export const Pico8Game = ({ gameJS, setPlaying }: { gameJS: string, setPlaying: 
               <div
                 className="p8_menu_buttons"
                 id="p8_menu_buttons"
-                style={{ marginLeft: "10px" }}
               >
                 <div
                   className="p8_menu_button"

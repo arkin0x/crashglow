@@ -2,6 +2,7 @@ import { useState, useContext, useRef } from 'react'
 import { publishGame, publishKind1 } from '../libraries/PublishGame'
 import { NDKContext } from '../providers/NDKProvider'
 import '../scss/Publish.scss'
+import { useNavigate } from 'react-router-dom'
 // import { NostrWindow } from '../types/NostrWindow'
 
 const PUBLISH_BUTTON_TEXT = "Publish ✨"
@@ -15,6 +16,7 @@ const PUBLISH_BUTTON_TEXT = "Publish ✨"
 // }
 
 export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateAction<boolean>>}> = ({setShowGames}) => { 
+  const navigate = useNavigate()
   const [upload, setUpload] = useState<FileList | null>(null)
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')
@@ -137,7 +139,7 @@ export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateActi
         </div>
         <br/>
         { !newlyPublished ? <button className="button" disabled={readyToPublish()} onClick={publish}>Publish 🚀</button> : null }
-        { newlyPublished ? <><h3>Published!</h3><p><button className="button" onClick={ () => {window.location.href = `/game/${newlyPublished}`}}>Play it now 👾</button></p></> : null }
+        { newlyPublished ? <><h3>Published!</h3><p><button className="button" onClick={ () => {navigate(`/game/${newlyPublished}`)}}>Play it now 👾</button></p></> : null }
       </>
       : <button className="button" type="button" onClick={activatePlugin}>{publishButton}</button> }
     <br/>

@@ -50,6 +50,12 @@
   cursor: pointer;
 }
 
+#touch_controls_background + div {
+  justify-content: center; /* centers horizontally */
+  align-items: start; /* centers vertically */
+  height: 90svh!important;
+}
+
 canvas {
   image-rendering: optimizeSpeed;
   image-rendering: -moz-crisp-edges;
@@ -59,6 +65,10 @@ canvas {
   -ms-interpolation-mode: nearest-neighbor;
   border: 0px;
   cursor: none;
+  // max-width: 800px;
+  width: 90svw;
+  margin: 0;
+  padding: 0;
 }
 
 .p8_start_button {
@@ -94,14 +104,18 @@ canvas {
   overflow: hidden;
 }
 
+#touch_controls_gfx {
+  top: -20svh;
+}
+
 #controls_left_panel {
-  width: 50vw;
-  left: 0;
-  top: calc(10svh + 100svw);
+  width: 60vw;
+  left: -10svh;
+  top: calc(15svh + 100svw);
 }
 
 #controls_right_panel {
   width: 50vw;
   right: 0;
-  top: calc(10svh + 100svw);
+  top: calc(15svh + 100svw);
 }
