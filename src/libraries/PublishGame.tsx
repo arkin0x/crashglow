@@ -99,7 +99,7 @@ function createChunkEvent(ndk: NDK, chunk: string, index: number, file: File, re
   ndkEvent.content = chunk 
   ndkEvent.tags.push(['e', referenceID, ndk.explicitRelayUrls![0], "root" ])
   ndkEvent.tags.push(['m', file.type])
-  ndkEvent.tags.push(['alt', `This is a binary chunk of a web-based video game. Play the full game at https://crashglow.com/play/${nevent}`])
+  ndkEvent.tags.push(['alt', `This is a binary chunk of a web-based video game. Play the full game at https://crashglow.com/game/${nevent}`])
   ndkEvent.tags.push(['index', index.toString()])
   ndkEvent.tags.push(['x', hash])
 

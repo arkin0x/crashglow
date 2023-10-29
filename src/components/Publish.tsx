@@ -14,7 +14,7 @@ const PUBLISH_BUTTON_TEXT = "Publish ✨"
 //     }
 // }
 
-export const Publish: React.FC = () => {
+export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateAction<boolean>>}> = ({setShowGames}) => { 
   const [upload, setUpload] = useState<FileList | null>(null)
   const [title, setTitle] = useState<string>('')
   const [content, setContent] = useState<string>('')
@@ -78,7 +78,7 @@ export const Publish: React.FC = () => {
     if (!ndk) return
     if (!upload) return
 
-    setShowGames(false)
+    if (setShowGames) setShowGames(false)
 
     // publish kind1, get id
     const kind1 = await publishKind1(ndk, title, content, version, uuid, upload)
@@ -92,7 +92,6 @@ export const Publish: React.FC = () => {
         const nevent = await publishGame(ndk, base64, file, kind1)
         console.log('published', nevent)
         setNewlyPublished(kind1.id)
-        // navigate(`/play/${nevent}`)
       }
     }
   }
@@ -138,7 +137,7 @@ export const Publish: React.FC = () => {
         </div>
         <br/>
         { !newlyPublished ? <button className="button" disabled={readyToPublish()} onClick={publish}>Publish 🚀</button> : null }
-        { newlyPublished ? <><h3>Published!</h3><p><button className="button" onClick={ () => {window.location.href = `/play/${newlyPublished}`}}>Play it now 👾</button></p></> : null }
+        { newlyPublished ? <><h3>Published!</h3><p><button className="button" onClick={ () => {window.location.href = `/game/${newlyPublished}`}}>Play it now 👾</button></p></> : null }
       </>
       : <button className="button" type="button" onClick={activatePlugin}>{publishButton}</button> }
     <br/>

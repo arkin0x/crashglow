@@ -44,3 +44,18 @@ export const replaceScript = (html: string, script: string): string => {
     return html
   }
 }
+
+export const semverCompare = (a: string, b: string): number => {
+  const aParts = a.split('.');
+  const bParts = b.split('.');
+  for (let i = 0; i < 3; i++) {
+    const aPart = parseInt(aParts[i]);
+    const bPart = parseInt(bParts[i]);
+    if (aPart > bPart) {
+      return 1;
+    } else if (aPart < bPart) {
+      return -1;
+    }
+  }
+  return 0;
+};

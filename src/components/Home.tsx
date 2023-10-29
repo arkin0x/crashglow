@@ -26,7 +26,8 @@ export const Home = () => {
     const latest = games.map((game) => {
       if (isTest(game)) return null
       const u = game.tags.find((tag) => tag[0] === 'u')
-      const version = u![1].split('_')[1] || u![1].split(':')[1] || u![2] || '0.1.0?'
+      // const version = u![1].split('_')[1] || u![1].split(':')[1] || u![2] || '0.1.0?'
+      const version = u![2] || '0.1.0?'
       if (!game.content) return null
       if (game.content === 'test') return null
       return (
@@ -35,7 +36,7 @@ export const Home = () => {
           <img className="game-card-preview" src={game.content.split('\n')[0]}/>
           <br/>
           <br/>
-          <button className="button" onClick={() => {window.location.href=`/play/${game.id}`}}>Play 👾</button>
+          <button className="button" onClick={() => {window.location.href=`/game/${game.id}`}}>Play 👾</button>
         </div>
       )
     })
