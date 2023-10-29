@@ -12,24 +12,31 @@ import { useNavigate } from 'react-router-dom'
 export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction<boolean>>, urlIdentifier?: string}> = ({ setPlaying, urlIdentifier }) => {
   const navigate = useNavigate()
   const ndk = useContext(NDKContext)
-  const identifier = useRef<HTMLInputElement>(null)
+  const identifierRef = useRef<HTMLInputElement>(null)
+  const [identifierField, setIdentifierField] = useState<string>('') // [event id, nevent, uuid
+  const [id, setID] = useState<string | undefined>(undefined) // [event id, nevent, uuid
   const [gettingGame, setGettingGame] = useState(false)
   const [assets, setAssets] = useState<{[key: string]: string}>({})
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
+    setID(urlIdentifier || identifierField)
+  }, [urlIdentifier, identifierField])
+
+  useEffect(() => {
     // fetch the game by URL id or uuid or nevent
     if (!ndk) return
+    if (!urlIdentifier) return
     getGame()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlIdentifier, ndk])
 
   const getGame = async () => {
-    const id = urlIdentifier || identifier.current!.value
-    if (!id) setNotFound(true)
+    const id = urlIdentifier || identifierRef.current?.value
+    if (!id) return setNotFound(true)
     if (gettingGame) return
     setGettingGame(true)
-    if (isUUIDv4(id)) return getGameByUUID(id)
+    if (id && isUUIDv4(id)) return getGameByUUID(id)
     getGameByID(id)
   }
 
@@ -90,7 +97,11 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
         js = value
       }
     }
-    return <Pico8Game gameJS={js} setPlaying={setPlaying}/>
+    return <Pico8Game key={id} gameJS={js} setPlaying={setPlaying}/>
+  }
+
+  const handleIdentifierChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIdentifierField(e.target.value)
   }
 
   return (
@@ -114,9 +125,9 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
           :
             <div className="layout">
               <h2>Load a Game</h2>
-              <label htmlFor="nevent">Enter game nevent:</label><br/>
+              <label htmlFor="nevent">Enter a game's nevent, event id, or UUID:</label><br/>
               <br/>
-              <input ref={identifier} type="text" placeholder="Event name" />
+              <input ref={identifierRef} type="text" placeholder="Game identifier" onChange={handleIdentifierChange}/>
               <br/>
               <br/>
               <button className="button" disabled={gettingGame || !ndk} onClick={getGame}>Play 🕹️</button>
