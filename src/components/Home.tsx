@@ -45,9 +45,11 @@ export const Home = () => {
       }
       if (!game.content) return null
       if (game.content === 'test') return null
+      const title = game.tags.find((tag) => tag[0] === 'subject')
+
       return (
         <div key={game.id} className="game-card">
-          <h3 className="game-card-title">{game.tags.find((tag) => tag[0] === 'subject')![1]}<small style={{float:'right'}}>{version}</small></h3>
+          <h3 className="game-card-title">{ title && title[1] ? title[1] : null}<small style={{float:'right'}}>{version}</small></h3>
           <img className="game-card-preview" src={game.content.split('\n')[0]}/>
           <br/>
           <br/>
