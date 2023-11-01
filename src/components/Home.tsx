@@ -36,7 +36,7 @@ export const Home = () => {
       // const version = u![1].split('_')[1] || u![1].split(':')[1] || u![2] || '0.1.0?'
       let version = '0.1.0?'
       try {
-        version = u[2]
+        if (u) version = u[2]
       } catch(e) {
         console.log(e)
         // no action
