@@ -71,10 +71,14 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
       return
     } 
     const sortedGames = games.sort((a: NDKEvent, b: NDKEvent) => {
-      const semverA = a.tags.find((tag) => tag[0] === 'u')![2];
-      const semverB = b.tags.find((tag) => tag[0] === 'u')![2];
-      return semverCompare(semverB, semverA);
-    });
+      try {
+        const semverA = a.tags.find((tag) => tag[0] === 'u')![2];
+        const semverB = b.tags.find((tag) => tag[0] === 'u')![2];
+        return semverCompare(semverB, semverA);
+      } catch (e) {
+        return 0
+      }
+    })
     console.log(sortedGames)
     const newestVersion = sortedGames[0]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
