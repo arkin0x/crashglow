@@ -6,12 +6,14 @@ import { useNavigate } from 'react-router-dom'
 
 const isTest = (game: NDKEvent) => {
   try {
-    const findTest = game.tags.find((tag: string[]) => tag[0] === 'subject')![1].toLowerCase().includes('test') || game.content.includes('test')
-    return !!findTest
+    const findTest = game.tags.find((tag: string[]) => tag[0] === 'subject')
+    if (findTest && findTest[1]) {
+      return !!findTest[1].toLowerCase().includes('test') || game.content.includes('test')
+    }
   } catch (e) {
     // invalid tag. Not sure. Show it.
-    return false
   }
+  return false
 }
 
 export const Home = () => {
