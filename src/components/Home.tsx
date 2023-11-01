@@ -26,7 +26,11 @@ export const Home = () => {
     if (!ndk) return
     const fetchLatestGames = async () => {
       const loaded = await ndk.fetchEvents({ kinds: [1], limit: 10, "#t": ["crashglow"] })
-      setGames(Array.from(loaded))
+      const filtered = Array.from(loaded).filter( event => {
+        if (event.tags.find(tag => tag[1] === 'u')) return true
+        return false
+      })
+      setGames(filtered)
     }
     fetchLatestGames()
   }, [ndk])
