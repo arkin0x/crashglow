@@ -5,8 +5,13 @@ import { Publish } from './Publish'
 import { useNavigate } from 'react-router-dom'
 
 const isTest = (game: NDKEvent) => {
-  const findTest = game.tags.find((tag: string[]) => tag[0] === 'subject')![1].toLowerCase().includes('test') || game.content.includes('test')
-  return !!findTest
+  try {
+    const findTest = game.tags.find((tag: string[]) => tag[0] === 'subject')![1].toLowerCase().includes('test') || game.content.includes('test')
+    return !!findTest
+  } catch (e) {
+    // invalid tag. Not sure. Show it.
+    return false
+  }
 }
 
 export const Home = () => {
