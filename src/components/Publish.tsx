@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from 'react'
+import { useState, useContext, useRef, useMemo } from 'react'
 import { publishGame, publishKind1 } from '../libraries/PublishGame'
 import { NDKContext } from '../providers/NDKProvider'
 import '../scss/Publish.scss'
@@ -52,7 +52,6 @@ export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateActi
     }
   }
 
-
   const handleUploadChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setUpload(event.target.files)
@@ -74,7 +73,6 @@ export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateActi
   const handleVersionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setVersion(event.target.value)
   }
-
 
   const publish = async () => {
     if (!ndk) return
@@ -98,17 +96,16 @@ export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateActi
     }
   }
 
-  const readyToPublish = (): boolean => {
-    if (upload === null) return true
-    if (upload.length !== 2) return true
-    // check if upload contains a JS file and an image
-    if (!Array.from(upload).some(file => file.type === 'text/javascript')) return true
-    if (!Array.from(upload).some(file => ['image/png', 'image/jpeg', 'image/gif'].includes(file.type))) return true
-    if (title === '') return true
-    if (content === '') return true
-    if (version === '') return true
-    return false
-  }
+  const isReadyToPublish = useMemo((): boolean => {
+    if (upload === null || upload.length !==2) return false
+    // check if upload contains a JS or HTML file and an image
+    if (!Array.from(upload).some(file => file.type === 'text/javascript' || file.type === 'text/html')) return false
+    if (!Array.from(upload).some(file => ['image/png', 'image/jpeg', 'image/gif'].includes(file.type))) return false
+    if (title === '') return false
+    if (content === '') return false
+    if (version === '') return false
+    return true
+  }, [content, title, upload, version]);
 
   return (
     <>
@@ -118,10 +115,11 @@ export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateActi
         <h3 className="left">Supported web game formats:</h3>
         <ul>
           <li>PICO-8 Web Export</li>
+          <li>Bitsy HTML</li>
           {/* <li><em>Maybe</em> other HTML/JS games. Give it a shot!</li> */}
         </ul>
         <p className="left">
-          Select the following files:
+        For PICO-8, Select the following files:
         </p>
         <ul>
           <li>the PICO-8 JavaScript file that you exported from your game</li>
@@ -138,7 +136,7 @@ export const Publish: React.FC<{setShowGames?: React.Dispatch<React.SetStateActi
           <textarea className="glass-input" ref={contentRef} placeholder="Description + instructions" onChange={handleContentChange} />
         </div>
         <br/>
-        { !newlyPublished ? <button className="button" disabled={readyToPublish()} onClick={publish}>Publish 🚀</button> : null }
+        { !newlyPublished ? <button className="button" disabled={!isReadyToPublish} onClick={publish}>Publish 🚀</button> : null }
         { newlyPublished ? <><h3>Published!</h3><p><button className="button" onClick={ () => {navigate(`/game/${newlyPublished}`)}}>Play it now 👾</button></p></> : null }
       </>
       : <button className="button" type="button" onClick={activatePlugin}>{publishButton}</button> }

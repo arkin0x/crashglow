@@ -6,6 +6,7 @@ import { canDecode, isHex, isUUIDv4, semverCompare } from '../libraries/utils'
 import { BLOB, stitchChunks } from '../libraries/PublishGame'
 import Pico8Game from './Pico8Game'
 import { useNavigate } from 'react-router-dom'
+import { BitsyGame } from './BitsyGame'
 
 // TODO: support NIP19 nevents as well as hex
 
@@ -92,16 +93,16 @@ export const Retrieve: React.FC<{setPlaying: React.Dispatch<React.SetStateAction
     if (Object.keys(assets).length === 0) return null
 
     let js = ''
-    // let html = null
+    let html = null
     for (const [key, value] of Object.entries(assets)) {
-      // if (key.startsWith('text/html')) {
-      //   html = value
-      // }
+      if (key.startsWith('text/html')) {
+        html = value
+      }
       if (key.startsWith('text/javascript')) {
         js = value
       }
     }
-    return <Pico8Game key={id} gameJS={js} setPlaying={setPlaying}/>
+    return html ? <BitsyGame game={html} setPlaying={setPlaying} /> : <Pico8Game key={id} gameJS={js} setPlaying={setPlaying}/>
   }
 
   const handleIdentifierChange = (e: React.ChangeEvent<HTMLInputElement>) => {
