@@ -92,7 +92,7 @@ export const Retrieve: React.FC<{
         setAssets(assets);
     };
 
-    const LoadedGame = () => {
+    const loadGame = () => {
         if (Object.keys(assets).length === 0) return null;
 
         for (const [key, value] of Object.entries(assets)) {
@@ -126,7 +126,7 @@ export const Retrieve: React.FC<{
                 </div>
             ) : Object.keys(assets).length > 0 ? (
                 <div className="game-layout">
-                    <LoadedGame />
+                   {loadGame()}
                 </div>
             ) : urlIdentifier ? (
                 <div className="layout">
