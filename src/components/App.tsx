@@ -27,7 +27,7 @@ export const App = () => {
           <Header/>
           <Routes>
             <Route path="/" element={<Home/>}/>
-            <Route path="/load" element={<Retrieve setPlaying={setPlaying} />}/>
+            <Route path="/load" element={<Retrieve setPlaying={setPlaying} />} />
             <Route path="/game/:id" element={<Game setPlaying={setPlaying}/>} />
             <Route path="/publish" element={<Publish/>} />
           </Routes>
