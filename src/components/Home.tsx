@@ -25,7 +25,7 @@ export const Home = () => {
     }, [ndk]);
 
     const LatestGames = () => {
-        const latest = games.filter((game) => !isTest(game)).map((game) => {
+        const latest = games.map((game) => {
             const u = game.tags.find((tag) => tag[0] === "u");
             // const version = u![1].split('_')[1] || u![1].split(':')[1] || u![2] || '0.1.0?'
             let version = "0.1.0?";
@@ -77,15 +77,3 @@ export const Home = () => {
         </div>
     );
 };
-
-function isTest(game: NDKEvent) {
-    try {
-        const findTest = game.tags.find((tag: string[]) => tag[0] === "subject");
-        if (findTest && findTest[1]) {
-            return !!findTest[1].toLowerCase().includes("test") || game.content.includes("test");
-        }
-    } catch (e) {
-        // invalid tag. Not sure. Show it.
-    }
-    return false;
-}
