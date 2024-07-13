@@ -20,7 +20,8 @@ export const NDKProvider: React.FC<NDKProviderProps> = ({ children }) => {
       const signer = new NDKNip07Signer(3000)
       const ndkRef = new NDK({
         signer: window.nostr ? signer : undefined,
-        explicitRelayUrls: ["wss://dashglow-test.nostr1.com",'wss://relay.primal.net','wss://relay.damus.io','wss://relayable.org','wss://relay.nostr.me','wss://nos.lol','wss://relay.nostr.band']
+        explicitRelayUrls: ["wss://cyberspace.nostr1.com",'wss://relay.primal.net','wss://relay.damus.io','wss://nos.lol','wss://relay.nostr.band'],
+        autoConnectUserRelays: false,
       })
       await ndkRef.connect()
       setNDK(ndkRef)
